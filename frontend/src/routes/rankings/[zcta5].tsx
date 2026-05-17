@@ -10,6 +10,14 @@ import { formatNumber, scoreBgClass, scoreColorClass } from "../../lib/format";
 import type { CardEntries, FeatureEntry, FilterStatusEntry } from "../../api/types";
 import { cx } from "../../lib/cx";
 
+const SUB_SCORE_KEYS = [
+  "yield_score",
+  "demand_score",
+  "supply_score",
+  "operability_score",
+  "risk_score",
+];
+
 export default function ZipDetail() {
   const { zcta5 } = useParams<{ zcta5: string }>();
   const zip = useZip(zcta5);
@@ -35,9 +43,13 @@ export default function ZipDetail() {
     );
   }
   const data = zip.data;
+  const subScores = (data?.sub_scores ?? {}) as Record<string, number | null>;
   return (
-    <div className="space-y-4">
-      <header className="flex flex-wrap items-end justify-between gap-2">
+    <div className="space-y-4" data-testid="zip-detail-root">
+      <header
+        className="flex flex-wrap items-end justify-between gap-2"
+        data-testid="zip-detail-identity"
+      >
         <div className="space-y-1">
           <Link to="/rankings" className="text-xs text-accent underline">
             ← All rankings
@@ -60,13 +72,29 @@ export default function ZipDetail() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <h2 className="mb-2 text-lg font-semibold">Score breakdown</h2>
-          <SubScoreRadar
-            series={[
-              { name: zcta5, scores: data?.sub_scores ?? null },
-            ]}
-          />
+          <div data-testid="zip-detail-radar">
+            <SubScoreRadar
+              series={[
+                { name: zcta5, scores: data?.sub_scores ?? null },
+              ]}
+            />
+          </div>
+          <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1 text-sm sm:grid-cols-3">
+            {SUB_SCORE_KEYS.map((key) => (
+              <div
+                key={key}
+                data-testid={`zip-detail-score-${key}`}
+                className="flex items-baseline justify-between gap-2"
+              >
+                <dt className="text-fg-subtle text-xs uppercase">{key.replace(/_score$/, "")}</dt>
+                <dd className="font-mono tabular-nums">
+                  {formatNumber(subScores[key] ?? null, { decimals: 1 })}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </Card>
-        <Card>
+        <Card data-testid="zip-detail-filter-status">
           <h2 className="mb-2 text-lg font-semibold">Filter status</h2>
           <FilterStatusGrid items={data?.filter_status ?? []} />
         </Card>
@@ -74,11 +102,13 @@ export default function ZipDetail() {
 
       <Card>
         <h2 className="mb-2 text-lg font-semibold">Features</h2>
-        <FeatureTable features={(Array.isArray(data?.features) ? data!.features : []) as FeatureEntry[]} />
+        <FeatureTable
+          features={(Array.isArray(data?.features) ? data!.features : []) as FeatureEntry[]}
+        />
       </Card>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card>
+        <Card data-testid="zip-detail-chart-zhvi">
           <h2 className="mb-2 text-lg font-semibold">ZHVI (home value index)</h2>
           {zhvi.isLoading ? (
             <p className="text-sm text-fg-muted">Loading…</p>
@@ -86,7 +116,7 @@ export default function ZipDetail() {
             <ZhviLine series={[{ name: "ZHVI", data: zhvi.data?.series }]} />
           )}
         </Card>
-        <Card>
+        <Card data-testid="zip-detail-chart-zori">
           <h2 className="mb-2 text-lg font-semibold">ZORI (rent index)</h2>
           {zori.isLoading ? (
             <p className="text-sm text-fg-muted">Loading…</p>
@@ -96,7 +126,7 @@ export default function ZipDetail() {
         </Card>
       </div>
 
-      <Card>
+      <Card data-testid="zip-detail-chart-redfin">
         <h2 className="mb-2 text-lg font-semibold">Redfin market activity</h2>
         <RedfinTrio data={redfin.data} />
       </Card>
@@ -138,7 +168,7 @@ function FeatureTable({ features }: { features: FeatureEntry[] }) {
     return <p className="text-sm text-fg-muted">No features available.</p>;
   }
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto" data-testid="zip-detail-features-table">
       <table className="min-w-full text-sm">
         <thead>
           <tr className="text-left text-xs uppercase tracking-wide text-fg-subtle">
