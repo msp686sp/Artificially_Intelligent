@@ -11,7 +11,12 @@ from rental.db import connect, init_schema
 from rental.features import latest_zhvi_per_zip
 from rental.filters import apply_filters
 from rental.manifest import load_manifest, staleness_days
-from rental.scoring import compute_market_score, init_composite_views
+from rental.scoring import (
+    compute_market_score,
+    init_composite_views,
+    populate_zip_features,
+    populate_zip_scores,
+)
 from rental.sources import REGISTRY
 
 
@@ -92,18 +97,24 @@ def digest():
     show_default=True,
 )
 def rank(output: Path, weights: Path, filters_path: Path):
-    """Compute MarketScore, apply hard filters, write a ranked CSV."""
+    """Compute MarketScore, apply hard filters, write a ranked CSV.
+
+    Pipeline: populate features + sub-scores → composite → filters → CSV.
+    Safe to run against an empty warehouse — every step degrades to an
+    empty result rather than crashing.
+    """
     con = connect()
     init_schema(con)
     init_composite_views(con)
-
-    scores = compute_market_score(con, weights_path=weights)
-    if scores.empty:
+    feature_rows = populate_zip_features(con)
+    score_rows = populate_zip_scores(con)
+    if not feature_rows and not score_rows:
         click.echo(
-            "No sub-scores available yet (zip_scores is empty). "
-            "Run the sub-score producers first.",
+            "No source data in warehouse. Run `rental refresh --source <name>` first.",
             err=True,
         )
+
+    scores = compute_market_score(con, weights_path=weights)
     features = _load_features(con)
     filtered, audit = apply_filters(scores, features, filters_path=filters_path)
 

@@ -17,6 +17,7 @@ from rental.scoring.composite import compute_market_score, load_market_weights
 from rental.scoring.demand_score import demand_score
 from rental.scoring.normalize import zscore_within_state
 from rental.scoring.operability_score import operability_score
+from rental.scoring.populate import populate_zip_features, populate_zip_scores
 from rental.scoring.risk_score import risk_score
 from rental.scoring.supply_score import compute_supply_score
 from rental.scoring.yield_score import yield_score
@@ -36,6 +37,8 @@ __all__ = [
     "init_composite_views",
     "load_market_weights",
     "operability_score",
+    "populate_zip_features",
+    "populate_zip_scores",
     "risk_score",
     "yield_score",
     "zscore_within_state",

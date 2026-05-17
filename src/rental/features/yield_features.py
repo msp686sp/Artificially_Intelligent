@@ -7,7 +7,7 @@ Inputs:
 Outputs a single DataFrame keyed on `zcta5` with columns:
   - latest_zhvi
   - latest_zori
-  - gross_yield_monthly_pct   (latest_zori * 12 / latest_zhvi) * 100
+  - gross_yield_monthly_pct   (latest_zori / latest_zhvi) * 100  (e.g. 0.75 = 0.75%/mo)
   - rent_growth_5yr_cagr      compound annual growth rate of ZORI over the
                               most recent ~5y window, in raw units (e.g. 0.04 = 4%/yr)
   - zori_coverage_months      total ZORI observations available for the zip
@@ -81,12 +81,12 @@ def yield_features(con: duckdb.DuckDBPyConnection) -> pd.DataFrame:
     out = out.merge(coverage, on="zcta5", how="left")
     out = out.merge(cagr, on="zcta5", how="left")
 
-    # Per-spec formula. The column name retains the historical
-    # "gross_yield_monthly_pct" string used in filters.yaml even though
-    # the *12 in the numerator yields an annual percent — downstream
-    # config references the same name, so we stay consistent.
+    # Per the locked plan: gross_yield expressed as MONTHLY percent
+    # (rent / price × 100). The filters.yaml threshold of 0.8 reads as
+    # "monthly rent is at least 0.8% of price" — the classic investor
+    # heuristic ~ 9.6% annual gross yield.
     out["gross_yield_monthly_pct"] = (
-        (out["latest_zori"] * 12.0) / out["latest_zhvi"]
+        out["latest_zori"] / out["latest_zhvi"]
     ) * 100.0
     return out
 

@@ -23,6 +23,11 @@ dev = [
     "pytest>=8.0",
     "ruff>=0.5",
 ]
+# Needed only for the real CBSA delineation xlsx fetch. Tests use a
+# bundled CSV fixture, so this is opt-in to keep the test footprint thin.
+xlsx = [
+    "openpyxl>=3.1",
+]
 
 [project.scripts]
 rental = "rental.cli:cli"

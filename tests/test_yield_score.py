@@ -49,11 +49,12 @@ def test_yield_features_row_per_zip():
 def test_gross_yield_formula_matches_spec():
     con = _con_with_zhvi_and_zori()
     df = yield_features(con).set_index("zcta5")
-    # Cleveland 44102: latest ZORI=960, ZHVI=91500 → (960*12/91500)*100 = ~12.59
+    # Per locked plan, gross_yield_monthly_pct = (rent / price) × 100.
+    # Cleveland 44102: ZORI=960, ZHVI=91500 → 960/91500*100 = ~1.0492%/mo.
     row = df.loc["44102"]
-    expected = (row["latest_zori"] * 12.0 / row["latest_zhvi"]) * 100.0
+    expected = (row["latest_zori"] / row["latest_zhvi"]) * 100.0
     assert row["gross_yield_monthly_pct"] == pytest.approx(expected, rel=1e-9)
-    assert row["gross_yield_monthly_pct"] == pytest.approx(12.5902, rel=1e-3)
+    assert row["gross_yield_monthly_pct"] == pytest.approx(1.0492, rel=1e-3)
 
 
 def test_rent_growth_5yr_cagr_uses_fallback_for_short_history():

@@ -25,8 +25,9 @@ score:
 	$(PYTHON) -m rental.cli score --output $(RANK_OUT)
 
 # Composite MarketScore: reads zip_scores, applies hard filters,
-# writes the ranked CSV. No-op outputs an empty CSV if sub-scores
-# haven't been produced yet.
+# writes the ranked CSV. The CLI populates features + sub-scores
+# from whatever raw data is present, so this works against a partial
+# warehouse.
 rank:
 	$(PYTHON) -m rental.cli rank --output $(MARKET_RANK_OUT)
 
@@ -34,6 +35,17 @@ rank:
 # Proves the end-to-end ETL → query → output path with no network.
 smoke: init refresh-fixture score
 	@echo "Smoke OK. Output at $(RANK_OUT)"
+
+# Full pipeline smoke against bundled fixtures: ZHVI + ZORI + Redfin
+# load, then populate features + sub-scores, composite + filters,
+# ranked CSV. Output zips may be empty depending on filter defaults —
+# what matters is the pipeline exits 0.
+smoke-rank: init
+	$(PYTHON) -m rental.cli refresh --source zillow_zhvi --from-fixture tests/fixtures/zhvi_sample.csv
+	$(PYTHON) -m rental.cli refresh --source zillow_zori --from-fixture tests/fixtures/zori_sample.csv
+	$(PYTHON) -m rental.cli refresh --source redfin_market --from-fixture tests/fixtures/redfin_market_sample.tsv
+	$(PYTHON) -m rental.cli rank --output $(MARKET_RANK_OUT)
+	@echo "Smoke rank OK. Output at $(MARKET_RANK_OUT)"
 
 test:
 	$(PYTHON) -m pytest

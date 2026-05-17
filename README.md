@@ -10,46 +10,87 @@ the US zip-code level, using free public data.
 
 ## Status
 
-Phase 0 complete: project skeleton, DuckDB warehouse + schema, CLI scaffold,
-Zillow ZHVI source as the reference ETL shape, and an end-to-end smoke
-pipeline that runs against a bundled fixture without network access.
+Phases 0–6 complete:
 
-Next: Phase 1 (full Yield half — adds ZORI, county tax rates, insurance estimates).
+- **0** project skeleton, DuckDB warehouse, Source ABC, Zillow ZHVI reference
+- **1** Zillow ZORI + Census geo spine; YieldScore
+- **2** BLS QCEW + IRS migration + ACS demographics; DemandScore
+- **3** Census Building Permits Survey + ACS housing stock; SupplyScore
+- **4** ACS property tax + NAIC state insurance + Eviction Lab + FEMA NRI; OperabilityScore + RiskScore
+- **5** MarketScore composite + hard-filter engine + `rental rank` CLI
+- **6** point-in-time feature snapshots, realized 5yr levered return, walk-forward weight tuner, HTML backtest report
+
+Plus Redfin Data Center (DOM, sale-to-list, inventory) and CI
+infrastructure (GitHub Actions, refresh manifest, `rental status` /
+`make doctor`).
+
+Next: Phase 7 (event alerts + weekly email digest), Phase 8 (Streamlit
+dashboard), then v2's property-level underwriter.
 
 ## Quick start
 
 ```bash
 make install         # install package + dev deps
 make init            # create the DuckDB warehouse
-make smoke           # end-to-end (uses bundled fixture, no network)
-make test            # run pytest
+make smoke           # Phase 0 fixture pipeline (init → refresh ZHVI → score CSV)
+make smoke-rank      # full pipeline (refreshes ZHVI + ZORI + Redfin → MarketScore CSV)
+make test            # 202 tests
 ```
 
-For a real refresh against Zillow's CDN (requires outbound network to
-`files.zillowstatic.com`):
+For real data refreshes (requires outbound network to the source hosts):
 
 ```bash
-make refresh         # fetch + load ZHVI from the public CSV
-make score           # write data/rankings/price_rank.csv
-make rank            # composite MarketScore + hard filters → data/rankings/market_score.csv
+rental refresh --source zillow_zhvi
+rental refresh --source zillow_zori
+rental refresh --source census_geo            # geo spine (Census ZCTA + CBSA)
+rental refresh --source bls_qcew              # jobs + wages
+rental refresh --source irs_migration         # county-to-county migration
+rental refresh --source acs_demographics
+rental refresh --source acs_housing_stock
+rental refresh --source census_bps            # building permits
+rental refresh --source redfin_market
+rental refresh --source county_tax_rate
+rental refresh --source eviction_lab
+rental refresh --source fema_nri
+rental rank                                   # composite MarketScore + hard filters
 ```
+
+To reach the CBSA delineation xlsx, install the `xlsx` extra:
+`pip install -e ".[xlsx]"`.
+
+## Backtest
+
+```bash
+rental backtest run   --output data/backtest/backtest_report.html
+rental backtest tune  --output data/backtest/tune_report.html
+```
+
+`run` produces a snapshot-by-snapshot Spearman + quintile-bucket
+report with bootstrap CIs and a READY / NOT READY banner.
+`tune` performs walk-forward weight tuning (default train 2013–17,
+validate 2018–22) and reports the best weights.
 
 ## Layout
 
 ```
 src/rental/
-  cli.py              # `rental {init,refresh,score,digest}`
-  config.py           # paths + YAML loaders
+  cli.py              # rental init/refresh/score/rank/status/backtest/digest
+  config.py           # paths + YAML loaders + env-var overrides
+  manifest.py         # refresh-freshness JSON tracker
   db/                 # DuckDB connection + schema
-  sources/            # one module per data source (Source ABC)
-  features/           # engineered metrics per dimension
+  sources/            # 12 data sources (Source ABC pattern)
+  features/           # engineered features per dimension
+  scoring/            # sub-scores + composite + populate driver
+  backtest/           # PIT snapshots, returns, walk-forward tuner, report
+  refdata/            # bundled reference data (state insurance averages)
 config/
-  filters.yaml        # configurable hard filters (defaults documented in plan)
-  weights.yaml        # composite scoring weights
+  filters.yaml        # configurable hard filters
+  weights.yaml        # composite + sub-score weights
   watchlist.yaml      # zips to monitor + alert rules (Phase 7)
+  state_insurance_rates.csv
 data/                 # gitignored; rebuildable from sources
-tests/                # pytest + bundled fixtures
-docs/                 # discovery + plan
+tests/                # 202 pytest cases + bundled fixtures
+docs/                 # discovery + build plan
 ```
 
 ## Development
