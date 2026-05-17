@@ -181,11 +181,19 @@ def backtest_run(start_year: int, end_year: int, output: Path):
     """Run the backtest over [start-year, end-year] annual snapshots."""
     from rental.backtest import run_backtest
     from rental.backtest.report import render_report
+    from rental.backtest.scorer import composite_score_fn
 
     con = connect()
     init_schema(con)
     dates = _default_snapshot_dates(start_year, end_year)
-    result = run_backtest(con, dates, _yield_only_score_fn())
+
+    def score_fn(features):
+        # Bind the live connection so the scorer can look up state codes
+        # for within-state z-scoring when the snapshot frame doesn't
+        # already carry them.
+        return composite_score_fn(features, con=con)
+
+    result = run_backtest(con, dates, score_fn)
     render_report(result, output)
     click.echo(f"Backtest wrote {len(result.snapshots)} snapshots → {output}")
 
@@ -205,28 +213,20 @@ def backtest_tune(train_start: int, train_end: int,
                   validate_start: int, validate_end: int,
                   output: Path):
     """Walk-forward weight tuning."""
-    import pandas as pd
-
     from rental.backtest import run_backtest, tune_weights
     from rental.backtest.report import render_report
-
-    def stub_factory(weights):
-        yw = weights.get("yield", 1.0)
-
-        def fn(features: pd.DataFrame) -> pd.DataFrame:
-            out = features[["zcta5"]].copy()
-            out["score"] = yw * features.get(
-                "gross_yield_monthly_pct", 0.0
-            ).fillna(0.0)
-            return out
-        return fn
+    from rental.backtest.scorer import composite_score_factory
 
     con = connect()
     init_schema(con)
     train_dates = _default_snapshot_dates(train_start, train_end)
     val_dates = _default_snapshot_dates(validate_start, validate_end)
-    tune = tune_weights(con, train_dates, val_dates, stub_factory)
-    result = run_backtest(con, val_dates, stub_factory(tune.best_weights))
+
+    def factory(weights):
+        return composite_score_factory(weights, con=con)
+
+    tune = tune_weights(con, train_dates, val_dates, factory)
+    result = run_backtest(con, val_dates, factory(tune.best_weights))
     render_report(result, output, tune=tune)
     click.echo(
         f"Tuned over {tune.grid_size} grid points. "
