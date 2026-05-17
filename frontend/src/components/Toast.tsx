@@ -24,12 +24,14 @@ export interface Toast {
 }
 
 type PushArg = string | (Omit<Toast, "id"> & { id?: string });
+/** Legacy tone names some routes pass as a 2nd arg. */
+type LegacyTone = "info" | "success" | "warning" | "danger" | "error";
 
 interface ToastContextValue {
   toasts: Toast[];
-  /** Push a toast. Accepts a string shorthand (info-tone title-only)
-   *  or a full Toast object. Returns the toast id. */
-  push: (toast: PushArg) => string;
+  /** Push a toast. Accepts a string shorthand (with optional tone) or a
+   *  full Toast object. Returns the toast id. */
+  push: (toast: PushArg, tone?: LegacyTone) => string;
   dismiss: (id: string) => void;
   clear: () => void;
 }
@@ -54,10 +56,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const push = useCallback(
-    (toast: PushArg) => {
+    (toast: PushArg, legacyTone?: LegacyTone) => {
+      const remap = (t?: LegacyTone): ToastTone =>
+        t === "danger" ? "error" : ((t ?? "info") as ToastTone);
       const obj =
         typeof toast === "string"
-          ? { tone: "info" as const, title: toast }
+          ? { tone: remap(legacyTone), title: toast }
           : toast;
       const id = obj.id ?? uid();
       const t: Toast = { durationMs: 4000, ...obj, id };

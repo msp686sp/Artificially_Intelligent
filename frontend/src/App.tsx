@@ -14,17 +14,15 @@ import ManifestPage from "@/routes/manifest";
 import LogsPage from "@/routes/logs";
 import SettingsPage from "@/routes/settings";
 
-// IMPORTANT — multi-agent coordination:
-// Page agents (5, 6, 7) replace the <EmptyState> placeholders below
-// with imports from `@/routes/<page>`. Add new imports at the top of
-// this file with a comment annotating which agent owns each.
-// Only edit between the ROUTES START/END markers. Shell + Providers +
-// 404 catch-all are owned by fe-shell (agent 4) and should not move.
+// Agent 6 (fe-rankings-zips)
+import RankingsIndex from "@/routes/rankings/index";
+import ZipDetail from "@/routes/rankings/[zcta5]";
+import CompareIndex from "@/routes/compare/index";
+import FiltersIndex from "@/routes/filters/index";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Single-user, local-first: refetch on focus is unnecessary.
       refetchOnWindowFocus: false,
       retry: 1,
       staleTime: 30_000,
@@ -33,7 +31,6 @@ const queryClient = new QueryClient({
 });
 
 export function App() {
-  // useState keeps the QueryClient stable across HMR re-renders.
   const [client] = useState(() => queryClient);
 
   return (
@@ -53,22 +50,10 @@ export function App() {
                 <Route path="/settings" element={<SettingsPage />} />
 
                 {/* Agent 6 (fe-rankings-zips) */}
-                <Route
-                  path="/rankings"
-                  element={<EmptyState pageName="Rankings" ownedBy="agent 6 (fe-rankings-zips)" />}
-                />
-                <Route
-                  path="/rankings/:zcta5"
-                  element={<EmptyState pageName="Zip detail" ownedBy="agent 6 (fe-rankings-zips)" />}
-                />
-                <Route
-                  path="/compare"
-                  element={<EmptyState pageName="Compare" ownedBy="agent 6 (fe-rankings-zips)" />}
-                />
-                <Route
-                  path="/filters"
-                  element={<EmptyState pageName="Filters & weights" ownedBy="agent 6 (fe-rankings-zips)" />}
-                />
+                <Route path="/rankings" element={<RankingsIndex />} />
+                <Route path="/rankings/:zcta5" element={<ZipDetail />} />
+                <Route path="/compare" element={<CompareIndex />} />
+                <Route path="/filters" element={<FiltersIndex />} />
 
                 {/* Agent 7 (fe-sql-backtest) */}
                 <Route

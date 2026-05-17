@@ -14,17 +14,19 @@ export function isNullish(value: unknown): value is null | undefined {
  * Returns "—" for null/undefined/NaN.
  */
 export function formatNumber(
-  value: number | null | undefined,
-  options: { decimals?: number; compact?: boolean } = {},
+  value: number | string | null | undefined | unknown,
+  options: { decimals?: number; compact?: boolean; suffix?: string } = {},
 ): string {
-  if (isNullish(value) || Number.isNaN(value)) return EMPTY;
-  const { decimals, compact } = options;
+  if (isNullish(value)) return EMPTY;
+  const n = typeof value === "number" ? value : Number(value);
+  if (Number.isNaN(n)) return EMPTY;
+  const { decimals, compact, suffix } = options;
   const formatter = new Intl.NumberFormat("en-US", {
     notation: compact ? "compact" : "standard",
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals ?? (compact ? 1 : 2),
   });
-  return formatter.format(value as number);
+  return suffix ? `${formatter.format(n)}${suffix}` : formatter.format(n);
 }
 
 /**
@@ -126,3 +128,19 @@ export function formatDuration(seconds: number | null | undefined): string {
 }
 
 export const EMPTY_VALUE = EMPTY;
+
+/** Tailwind class for a score band (high/mid/low). Used by rankings cells. */
+export function scoreColorClass(score: number | null | undefined): string {
+  if (score == null || Number.isNaN(score)) return "text-fg-muted";
+  if (score >= 1) return "text-success";
+  if (score >= -1) return "text-fg";
+  return "text-danger";
+}
+
+/** Tailwind background class for a score band, mirrors scoreColorClass. */
+export function scoreBgClass(score: number | null | undefined): string {
+  if (score == null || Number.isNaN(score)) return "bg-bg-subtle";
+  if (score >= 1) return "bg-success/20";
+  if (score >= -1) return "bg-bg-panel";
+  return "bg-danger/20";
+}

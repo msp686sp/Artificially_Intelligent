@@ -103,13 +103,43 @@ export type SchemaTree = SchemaTableNode[];
 // Rankings + zips
 // =====================================================================
 
+export type SortOrder = "asc" | "desc";
+
+/** Generic shape for the side-card key/value lists on the zip detail page. */
+export interface CardEntries {
+  [key: string]: unknown;
+}
+
+/** Engineered feature row on the zip detail page. */
+export interface FeatureEntry {
+  name: string;
+  raw?: number | null;
+  zscore?: number | null;
+  /** Alias for zscore — agent 6 routes use this shorter name. */
+  z?: number | null;
+  sign?: "+" | "-";
+  contribution?: number | null;
+}
+
+/** One row in the per-zip filter status panel. Accepts either the
+ * agent-2/canonical {status:"pass"|"fail"|"skip"} shape or agent-6's
+ * {passes:bool, value} variant. */
+export interface FilterStatusEntry {
+  name: string;
+  status?: "pass" | "fail" | "skip";
+  reason?: string;
+  passes?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  value?: any;
+}
+
 export interface RankingsQuery {
   state?: string;
   metro?: string;
   min_score?: number;
   max_score?: number;
   sort?: string;
-  order?: "asc" | "desc";
+  order?: SortOrder;
   limit?: number;
   offset?: number;
   filters_yaml?: string;
@@ -136,24 +166,57 @@ export interface RankingsPage {
   offset: number;
 }
 
+/** Back-compat alias used by agent 6's hooks. */
+export type RankingsResponse = RankingsPage;
+
+/** Flat shape used by the agent-6 zip-detail routes. The API returns the
+ * fields documented in plan §5, and agent 6 chose a flat layout. Older
+ * code that referenced `identity.county` etc. still works because both
+ * old and new fields are present below. */
 export interface ZipDetail {
   zcta5: string;
-  identity: {
+  state?: string | null;
+  metro?: string | null;
+  county?: string | null;
+  county_name?: string | null;
+
+  market_score?: number | null;
+
+  /** Nested optional alias (older callers). */
+  identity?: {
     state?: string | null;
     metro?: string | null;
     county?: string | null;
   };
-  scores: {
-    market_score: number;
+  scores?: {
+    market_score?: number;
     yield_score?: number | null;
     demand_score?: number | null;
     supply_score?: number | null;
     operability_score?: number | null;
     risk_score?: number | null;
   };
-  features: Array<{ name: string; raw: number | null; zscore: number | null }>;
+  /** Flat sub-scores for the radar chart. */
+  sub_scores?: {
+    yield_score?: number | null;
+    demand_score?: number | null;
+    supply_score?: number | null;
+    operability_score?: number | null;
+    risk_score?: number | null;
+  };
+  features?: Array<{ name: string; raw: number | null; zscore: number | null }> | Record<string, unknown>;
   filters_passed?: string[];
   filters_failed?: string[];
+  /** Per-filter result. Accepted as either array or dict form. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  filter_status?: any;
+  tax?: Record<string, unknown>;
+  insurance?: Record<string, unknown>;
+  eviction?: Record<string, unknown>;
+  climate?: Record<string, unknown>;
+  /** Index signature so compare-page code can iterate. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
 }
 
 export interface CompareResponse {
@@ -168,6 +231,39 @@ export interface TimeseriesPoint {
 export interface TimeseriesResponse {
   zcta5: string;
   series: TimeseriesPoint[];
+}
+
+/** Back-compat aliases for agent 6's hook names. */
+export type TimeSeriesResponse = TimeseriesResponse;
+export type TimeSeriesPoint = TimeseriesPoint;
+
+/** Sub-score bundle for the radar chart. Includes both the canonical
+ * 5-dimension names (yield/demand/supply/operability/risk) and the
+ * agent-6 chart's growth/stability/affordability projections. */
+export interface SubScores {
+  yield_score?: number | null;
+  demand_score?: number | null;
+  supply_score?: number | null;
+  operability_score?: number | null;
+  risk_score?: number | null;
+  growth_score?: number | null;
+  stability_score?: number | null;
+  affordability_score?: number | null;
+}
+
+/** Redfin trio (DOM + sale-to-list + inventory) series response. Agent 6's
+ * routes destructure flat ``dom``/``sale_to_list``/``inventory`` arrays. */
+export interface RedfinSeriesResponse {
+  zcta5: string;
+  dom?: Array<{ date: string; value: number | null }>;
+  sale_to_list?: Array<{ date: string; value: number | null }>;
+  inventory?: Array<{ date: string; value: number | null }>;
+  series?: Array<{
+    period_end: string;
+    median_dom?: number | null;
+    median_sale_to_list?: number | null;
+    inventory?: number | null;
+  }>;
 }
 
 // =====================================================================

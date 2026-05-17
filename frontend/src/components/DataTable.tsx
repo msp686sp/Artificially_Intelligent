@@ -48,9 +48,16 @@ export interface DataTableProps<TData> {
   // We also accept a richer column shape some routes use (key+accessor
   // form) — see DataTableColumnAny below.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  columns: DataTableColumnAny<TData>[];
+  columns?: DataTableColumnAny<TData>[];
   /** Optional row key extractor for the simplified column shape. */
   rowKey?: (row: TData, idx: number) => string | number;
+  /** Click handler on a data row. */
+  onRowClick?: (row: TData) => void;
+  /** Pre-constructed TanStack table instance (controlled mode). */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  table?: any;
+  /** Density override (controlled). */
+  density?: Density;
   /** Show toolbar with search/density/columns/export. Default true. */
   toolbar?: boolean;
   /** Optional title displayed at the left of the toolbar. */
@@ -78,8 +85,11 @@ export function DataTable<TData>({
   tableKey,
   data,
   rows,
-  columns,
+  columns = [],
   rowKey: _rowKey,
+  onRowClick: _onRowClick,
+  table: _externalTable,
+  density: densityProp,
   toolbar = true,
   title,
   pageSize = 50,
@@ -95,7 +105,8 @@ export function DataTable<TData>({
 
   const [sorting, setSorting] = useState<SortingState>(initialSort ?? []);
   const [globalFilter, setGlobalFilter] = useState("");
-  const [density, setDensity] = useState<Density>("comfortable");
+  const [densityState, setDensity] = useState<Density>("comfortable");
+  const density = densityProp ?? densityState;
   // Normalize legacy {key, header, accessor} columns into TanStack
   // ColumnDef shape so the table renderer can consume them uniformly.
   const normalizedColumns = useMemo(() => {

@@ -106,6 +106,38 @@ export function apiDel<T>(path: string, queryOrSignal?: Query | AbortSignal, sig
   return api.del<T>(path, queryOrSignal as Query | undefined, signal);
 }
 
+// Back-compat exports for agent 6's hooks.
+// Accepts a relaxed init shape where ``body`` may be any JSON-serialisable
+// value; we auto-stringify and set Content-Type so callers don't have to.
+type RelaxedInit = Omit<RequestInit, "body"> & { body?: unknown };
+
+export async function apiFetch<T>(path: string, init?: RelaxedInit): Promise<T> {
+  const url =
+    path.startsWith("http") || path.startsWith("/")
+      ? path
+      : `${API_BASE.replace(/\/$/, "")}/${path}`;
+  const headers = new Headers(init?.headers);
+  let body = init?.body as BodyInit | undefined;
+  if (body !== undefined && body !== null && typeof body !== "string" && !(body instanceof FormData)) {
+    if (!headers.has("Content-Type")) headers.set("Content-Type", "application/json");
+    body = JSON.stringify(body);
+  }
+  const res = await fetch(url, { ...(init as RequestInit), headers, body });
+  if (!res.ok) throw new ApiError(res.statusText, res.status, await res.text());
+  if (res.status === 204) return undefined as T;
+  return (await res.json()) as T;
+}
+
+export function buildQuery(query: Query): string {
+  const qs = new URLSearchParams();
+  for (const [k, v] of Object.entries(query ?? {})) {
+    if (v === null || v === undefined) continue;
+    qs.set(k, String(v));
+  }
+  const s = qs.toString();
+  return s ? `?${s}` : "";
+}
+
 /** Build the WebSocket URL for the /api/events stream. Relative protocol
  * so it picks up ws://localhost:5173 in dev (Vite proxy) and wss://...
  * if the app is served over HTTPS. */

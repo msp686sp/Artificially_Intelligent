@@ -6,6 +6,8 @@ interface CardProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
   dense?: boolean;
   /** Removes the inner padding so the caller controls spacing (e.g. for tables). */
   flush?: boolean;
+  /** Back-compat alias — `padded={false}` ⇒ no inner padding. */
+  padded?: boolean;
   /** Convenience: render a CardHeader at the top of the card. */
   title?: ReactNode;
   /** Header description (only used when `title` is also set). */
@@ -22,16 +24,17 @@ interface CardProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
  * sits inside one.
  */
 export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
-  { className, dense, flush, children, title, description, action, actions, ...rest },
+  { className, dense, flush, padded, children, title, description, action, actions, ...rest },
   ref,
 ) {
   const headerAction = action ?? actions;
+  const isFlush = flush ?? (padded === false);
   return (
     <div
       ref={ref}
       className={cn(
         "rounded-xl border border-border-subtle bg-bg-panel text-fg shadow-sm",
-        !flush && (dense ? "p-3" : "p-4"),
+        !isFlush && (dense ? "p-3" : "p-4"),
         className,
       )}
       {...rest}
