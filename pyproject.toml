@@ -46,6 +46,24 @@ target-version = "py311"
 [tool.ruff.lint]
 select = ["E", "F", "I", "W", "UP", "B"]
 
+# FastAPI's idiomatic ``Depends(get_thing)`` / ``Query(...)`` /
+# ``Body(...)`` defaults trip ruff's B008 ("function call in default
+# argument") even though they are part of FastAPI's documented contract
+# for declaring dependencies. Whitelist them so the lint stays useful
+# for genuine mutability bugs.
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = [
+    "fastapi.Body",
+    "fastapi.Depends",
+    "fastapi.Query",
+    "fastapi.Path",
+    "fastapi.Header",
+    "fastapi.Cookie",
+    "fastapi.Form",
+    "fastapi.File",
+    "fastapi.Security",
+]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
