@@ -1,0 +1,439 @@
+/* Minimal global stylesheet. Agent 4 (fe-shell) owns the production
+ * design system (Tailwind + custom tokens); this file provides enough
+ * styling that the pages I own render legibly in dev + Playwright
+ * smoke tests even when fe-shell has not yet been merged. */
+
+:root {
+  color-scheme: dark;
+  --bg: #0b0d12;
+  --bg-subtle: #11141b;
+  --bg-panel: #171a23;
+  --fg: #e6e8ee;
+  --fg-muted: #9aa0ad;
+  --fg-subtle: #6b7080;
+  --accent: #5b8def;
+  --accent-hover: #7a9ff2;
+  --success: #3aaf85;
+  --warning: #d9a441;
+  --danger: #e15c5c;
+  --border: #232733;
+  font-family:
+    Inter,
+    system-ui,
+    sans-serif;
+}
+
+html.light {
+  color-scheme: light;
+  --bg: #f7f8fb;
+  --bg-subtle: #eef0f5;
+  --bg-panel: #ffffff;
+  --fg: #1a1c22;
+  --fg-muted: #4d5260;
+  --fg-subtle: #7a808d;
+  --border: #d8dae0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+}
+button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+button.primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+button.danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  min-height: 44px;
+}
+
+.shell {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+}
+.shell .topbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border);
+}
+.shell .sidebar {
+  background: var(--bg-subtle);
+  border-right: 1px solid var(--border);
+  padding: 1rem 0.5rem;
+}
+.shell .sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.shell .sidebar a {
+  display: block;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.5rem;
+  color: var(--fg);
+  min-height: 44px;
+  line-height: 1.4;
+}
+.shell .sidebar a:hover {
+  background: var(--bg-panel);
+  text-decoration: none;
+}
+.shell .sidebar a.active {
+  background: var(--bg-panel);
+  color: var(--accent);
+}
+.shell .content {
+  padding: 1.5rem;
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+  .shell .sidebar {
+    display: none;
+  }
+  .shell .content {
+    padding: 1rem;
+  }
+  .mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    background: var(--bg-subtle);
+    border-top: 1px solid var(--border);
+    padding: 0.25rem;
+    z-index: 10;
+  }
+  .mobile-nav a {
+    flex: 1;
+    text-align: center;
+    padding: 0.625rem 0.25rem;
+    color: var(--fg);
+    min-height: 44px;
+    font-size: 0.85rem;
+  }
+}
+
+.card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.stat {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.stat .label {
+  color: var(--fg-muted);
+  font-size: 0.85rem;
+}
+.stat .value {
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+.grid.cards {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+.grid.source-cards {
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  border: 1px solid var(--border);
+  background: var(--bg-subtle);
+}
+.badge.ok {
+  background: rgba(58, 175, 133, 0.15);
+  color: var(--success);
+  border-color: rgba(58, 175, 133, 0.4);
+}
+.badge.stale {
+  background: rgba(217, 164, 65, 0.15);
+  color: var(--warning);
+  border-color: rgba(217, 164, 65, 0.4);
+}
+.badge.error {
+  background: rgba(225, 92, 92, 0.15);
+  color: var(--danger);
+  border-color: rgba(225, 92, 92, 0.4);
+}
+.badge.never {
+  background: rgba(154, 160, 173, 0.15);
+  color: var(--fg-muted);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.data-table th,
+.data-table td {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.data-table th {
+  color: var(--fg-muted);
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+}
+.data-table tbody tr:hover {
+  background: var(--bg-subtle);
+}
+
+@media (max-width: 640px) {
+  .data-table thead {
+    display: none;
+  }
+  .data-table tr {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.25rem 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table td {
+    display: contents;
+    border: none;
+    padding: 0;
+    white-space: normal;
+  }
+  .data-table td::before {
+    content: attr(data-label);
+    color: var(--fg-muted);
+    font-size: 0.85rem;
+  }
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.toolbar .spacer {
+  flex: 1;
+}
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 1rem;
+}
+.dialog {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  max-width: 480px;
+  width: 100%;
+}
+.dialog h3 {
+  margin: 0 0 0.75rem 0;
+}
+.dialog .actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.toast-host {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 100;
+  max-width: calc(100vw - 2rem);
+}
+.toast {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  min-width: 240px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+.toast.success {
+  border-color: rgba(58, 175, 133, 0.5);
+}
+.toast.error {
+  border-color: rgba(225, 92, 92, 0.5);
+}
+
+.progress {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-subtle);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress > .fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.2s linear;
+}
+
+.health-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+}
+.health-pill .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fg-muted);
+}
+.health-pill .dot.ok {
+  background: var(--success);
+}
+.health-pill .dot.degraded {
+  background: var(--warning);
+}
+.health-pill .dot.down {
+  background: var(--danger);
+}
+
+.muted {
+  color: var(--fg-muted);
+}
+.row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+.mono {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 0.85rem;
+}
+.empty-state {
+  padding: 2rem;
+  text-align: center;
+  color: var(--fg-muted);
+  background: var(--bg-panel);
+  border: 1px dashed var(--border);
+  border-radius: 0.75rem;
+}
+.section-title {
+  margin: 1.5rem 0 0.75rem 0;
+  font-size: 1.1rem;
+}
+.kv-list {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 1rem;
+}
+.kv-list dt {
+  color: var(--fg-muted);
+}
+.kv-list dd {
+  margin: 0;
+  word-break: break-all;
+}
