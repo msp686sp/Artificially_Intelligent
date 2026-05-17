@@ -19,6 +19,7 @@ data/warehouse.duckdb
 data/snapshots/
 data/rankings/
 data/backtest/
+data/manifest.json
 
 # Secrets / env
 .env
