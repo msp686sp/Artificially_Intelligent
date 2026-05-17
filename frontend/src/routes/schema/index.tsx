@@ -90,7 +90,7 @@ export default function SchemaBrowser() {
   }, [previewMutation.data]);
 
   return (
-    <div className="flex flex-col gap-4 p-4 lg:p-6">
+    <div className="flex flex-col gap-4 p-4 lg:p-6" data-testid="schema-root">
       <header className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-semibold">Schema browser</h1>
         {schemaQuery.isLoading && <Spinner />}
@@ -126,7 +126,7 @@ export default function SchemaBrowser() {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[20rem_1fr]">
         {/* Desktop tree */}
-        <aside className="hidden lg:block">
+        <aside className="hidden lg:block" data-testid="schema-tree">
           <Card className="max-h-[calc(100vh-10rem)] overflow-auto">
             <nav className="flex flex-col gap-3 text-sm">
               <section>
@@ -138,6 +138,7 @@ export default function SchemaBrowser() {
                     <li key={t.name}>
                       <button
                         onClick={() => setSelectedName(t.name)}
+                        data-testid={`schema-tree-item-${t.name}`}
                         className={cn(
                           "w-full rounded-md px-2 py-1 text-left",
                           selectedName === t.name
@@ -160,6 +161,7 @@ export default function SchemaBrowser() {
                     <li key={t.name}>
                       <button
                         onClick={() => setSelectedName(t.name)}
+                        data-testid={`schema-tree-item-${t.name}`}
                         className={cn(
                           "w-full rounded-md px-2 py-1 text-left",
                           selectedName === t.name
@@ -177,7 +179,7 @@ export default function SchemaBrowser() {
           </Card>
         </aside>
 
-        <section className="flex flex-col gap-4">
+        <section className="flex flex-col gap-4" data-testid="schema-preview">
           {!selected ? (
             <Card>
               <p className="text-fg-muted">
@@ -213,6 +215,7 @@ export default function SchemaBrowser() {
                     <Button
                       compact
                       variant="ghost"
+                      data-testid="schema-preview-open-sql-btn"
                       onClick={() =>
                         navigate(
                           `/sql?q=${encodeURIComponent(tableSqlSkeleton(selected))}`,
