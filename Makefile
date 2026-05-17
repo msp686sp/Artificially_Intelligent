@@ -1,8 +1,9 @@
-.PHONY: init install refresh refresh-fixture score rank smoke test lint clean
+.PHONY: init install refresh refresh-fixture score rank smoke test lint ci doctor status clean
 
 PYTHON ?= python3
 RANK_OUT ?= data/rankings/price_rank.csv
 MARKET_RANK_OUT ?= data/rankings/market_score.csv
+STALE_DAYS ?= 45
 
 install:
 	$(PYTHON) -m pip install -e ".[dev]"
@@ -40,5 +41,17 @@ test:
 lint:
 	$(PYTHON) -m ruff check src tests
 
+# What CI runs. Use this locally before pushing to catch drift early.
+ci: test lint
+
+# Source freshness summary (pretty table).
+status:
+	$(PYTHON) -m rental.cli status
+
+# Health check: status + staleness gate. Warns (and exits non-zero) if
+# any source is older than STALE_DAYS (default 45) or in error state.
+doctor:
+	$(PYTHON) -m rental.cli status --stale-days $(STALE_DAYS) --strict
+
 clean:
-	rm -rf data/warehouse.duckdb data/raw data/interim data/snapshots data/rankings
+	rm -rf data/warehouse.duckdb data/raw data/interim data/snapshots data/rankings data/manifest.json

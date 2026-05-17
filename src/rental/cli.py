@@ -1,6 +1,6 @@
-"""Rental CLI: init, refresh, score, rank, backtest, digest (stub)."""
+"""Rental CLI: init, refresh, score, rank, backtest, status, digest (stub)."""
 
-from datetime import date
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 import click
@@ -10,6 +10,7 @@ from rental.config import CONFIG_DIR, DATA_DIR, RAW_DIR, WAREHOUSE_PATH
 from rental.db import connect, init_schema
 from rental.features import latest_zhvi_per_zip
 from rental.filters import apply_filters
+from rental.manifest import load_manifest, staleness_days
 from rental.scoring import compute_market_score, init_composite_views
 from rental.sources import REGISTRY
 
@@ -64,6 +65,11 @@ def digest():
     click.echo("Not yet implemented (Phase 7).")
 
 
+# ============================================================
+# Phase 5 — composite MarketScore + hard filters
+# ============================================================
+
+
 @cli.command()
 @click.option(
     "--output",
@@ -113,7 +119,7 @@ def rank(output: Path, weights: Path, filters_path: Path):
         click.echo(head)
 
 
-def _load_features(con) -> "object":  # narrow type avoids pandas import-at-top noise
+def _load_features(con) -> "object":
     import pandas as pd
 
     try:
@@ -123,7 +129,7 @@ def _load_features(con) -> "object":  # narrow type avoids pandas import-at-top 
 
 
 # ============================================================
-# Phase 6 backtest harness
+# Phase 6 — backtest harness
 # ============================================================
 
 
@@ -216,6 +222,135 @@ def backtest_tune(train_start: int, train_end: int,
         f"Best train rho={tune.train_mean_spearman:.4f}, "
         f"validate rho={tune.validate_mean_spearman:.4f} → {output}"
     )
+
+
+# ============================================================
+# Source freshness / status
+# ============================================================
+
+# Per-source warehouse row counts. Extend when adding new sources.
+_WAREHOUSE_ROW_QUERIES: dict[str, str] = {
+    "zillow_zhvi": "SELECT COUNT(*) FROM raw_zillow_zhvi",
+    "zillow_zori": "SELECT COUNT(*) FROM raw_zillow_zori",
+    "redfin_market": "SELECT COUNT(*) FROM raw_redfin_market",
+    "bls_qcew": "SELECT COUNT(*) FROM raw_bls_qcew",
+    "irs_migration": "SELECT COUNT(*) FROM raw_irs_migration",
+    "acs_demographics": "SELECT COUNT(*) FROM raw_acs_demographics",
+    "census_bps": "SELECT COUNT(*) FROM raw_census_bps",
+    "acs_housing_stock": "SELECT COUNT(*) FROM raw_acs_housing_stock",
+    "county_tax_rate": "SELECT COUNT(*) FROM raw_county_tax_rate",
+    "eviction_lab": "SELECT COUNT(*) FROM raw_eviction_lab",
+    "fema_nri": "SELECT COUNT(*) FROM raw_fema_nri",
+}
+
+
+def _warehouse_row_count(con, source: str) -> int | None:
+    """Best-effort row count for a source; ``None`` if the table is missing."""
+    sql = _WAREHOUSE_ROW_QUERIES.get(source)
+    if sql is None:
+        return None
+    try:
+        row = con.execute(sql).fetchone()
+    except Exception:
+        return None
+    return int(row[0]) if row else 0
+
+
+@cli.command()
+@click.option(
+    "--stale-days",
+    type=int,
+    default=45,
+    show_default=True,
+    help="Warn (exit-1 in --strict mode) when a source is older than this.",
+)
+@click.option(
+    "--strict",
+    is_flag=True,
+    default=False,
+    help="Exit non-zero if any source is stale or in error state.",
+)
+def status(stale_days: int, strict: bool):
+    """Pretty-print refresh manifest + warehouse row counts."""
+    from rich.console import Console
+    from rich.table import Table
+
+    console = Console()
+    manifest = load_manifest()
+
+    if not manifest and not REGISTRY:
+        console.print("[yellow]No refreshes recorded.[/yellow]")
+        return
+
+    sources = sorted(set(REGISTRY) | set(manifest))
+
+    if not sources:
+        console.print("[yellow]No refreshes recorded.[/yellow]")
+        return
+
+    table = Table(title="Rental refresh status", show_lines=False)
+    table.add_column("source", style="bold")
+    table.add_column("last refresh (UTC)")
+    table.add_column("age (d)", justify="right")
+    table.add_column("manifest rows", justify="right")
+    table.add_column("warehouse rows", justify="right")
+    table.add_column("status")
+
+    con = None
+    if WAREHOUSE_PATH.exists():
+        try:
+            con = connect()
+        except Exception:
+            con = None
+
+    any_stale = False
+    any_error = False
+    now = datetime.now(UTC)
+    for source in sources:
+        entry = manifest.get(source)
+        wh_rows = _warehouse_row_count(con, source) if con is not None else None
+        wh_cell = "-" if wh_rows is None else f"{wh_rows:,}"
+
+        if entry is None:
+            table.add_row(
+                source, "[dim]never[/dim]", "-", "-", wh_cell,
+                "[yellow]no refresh[/yellow]",
+            )
+            continue
+
+        age = staleness_days(entry, now=now)
+        stale = age > stale_days
+        if stale:
+            any_stale = True
+        if entry.status != "ok":
+            any_error = True
+
+        status_label = (
+            "[green]ok[/green]" if entry.status == "ok"
+            else f"[red]{entry.status}[/red]"
+        )
+        if stale:
+            status_label = f"{status_label} [yellow](stale)[/yellow]"
+
+        table.add_row(
+            source,
+            entry.last_refresh.strftime("%Y-%m-%d %H:%M"),
+            f"{age:.1f}",
+            f"{entry.rows_loaded:,}",
+            wh_cell,
+            status_label,
+        )
+
+    console.print(table)
+
+    if con is None and WAREHOUSE_PATH.exists() is False:
+        console.print(
+            f"[dim]warehouse not initialized ({WAREHOUSE_PATH}); "
+            "run `rental init`[/dim]"
+        )
+
+    if strict and (any_stale or any_error):
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

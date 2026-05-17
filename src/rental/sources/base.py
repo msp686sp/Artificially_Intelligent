@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 import duckdb
@@ -48,4 +48,19 @@ class Source(ABC):
                 "INSERT INTO refresh_log VALUES (?, ?, ?, ?, ?, ?)",
                 [self.name, started, datetime.utcnow(), rows, status, error],
             )
+            # Persist a manifest entry so freshness can be queried without
+            # opening DuckDB. Best-effort: never let manifest IO mask the
+            # actual refresh result.
+            try:
+                from rental.manifest import update_manifest
+
+                update_manifest(
+                    source=self.name,
+                    rows_loaded=rows,
+                    status=status,
+                    error=error,
+                    when=datetime.now(UTC),
+                )
+            except Exception:
+                pass
         return RefreshResult(self.name, rows, status, error)
