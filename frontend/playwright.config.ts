@@ -55,12 +55,18 @@ export default defineConfig({
     {
       name: "mobile-iphone-14",
       use: {
-        // iPhone 14 emulation (390x844 viewport, touch, mobile UA).
-        ...devices["iPhone 13"],
+        // iPhone 14 viewport emulation. We use Chromium (not WebKit)
+        // because the sandbox only has Chromium browsers installed.
+        // Mobile-specific behavior (touch, viewport, isMobile) still
+        // exercises the responsive layout paths in the UI.
+        browserName: "chromium",
         viewport: { width: 390, height: 844 },
         deviceScaleFactor: 3,
         isMobile: true,
         hasTouch: true,
+        userAgent:
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) " +
+          "AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
       },
     },
   ],

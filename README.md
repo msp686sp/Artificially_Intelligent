@@ -3,6 +3,22 @@
 ![CI](https://github.com/msp686sp/Artificially_Intelligent/actions/workflows/ci.yml/badge.svg)
 
 Personal platform for finding profitable buy-and-hold SFR rental markets at
+the US zip-code level — with a FastAPI + React/Tailwind GUI on top. See
+[`docs/gooey-plan.md`](docs/gooey-plan.md) for the GUI build plan.
+
+## GUI quick start
+
+```bash
+make gui-install       # FastAPI extras
+make gui-fe-install    # frontend deps
+make gui-api-dev       # FastAPI on :8000  (in one terminal)
+make gui-fe-dev        # Vite on :5173    (in another)
+# → open http://localhost:5173
+```
+
+Visual baselines for every route at desktop + mobile live under
+[`frontend/tests/e2e/__screenshots__/visual-capture.spec.ts/`](frontend/tests/e2e/__screenshots__/visual-capture.spec.ts/).
+Regenerate with `make gui-screens`.
 the US zip-code level, using free public data.
 
 - **Discovery:** [`docs/rental-market-analysis-discovery.md`](docs/rental-market-analysis-discovery.md)
