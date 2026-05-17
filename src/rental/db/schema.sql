@@ -59,3 +59,23 @@ CREATE TABLE IF NOT EXISTS refresh_log (
     status        VARCHAR,
     error         VARCHAR
 );
+
+-- ============================================================
+-- Phase 5 composite scoring contract.
+-- Sub-score producer agents (yield, demand, supply, operability,
+-- risk) write into this single skeleton table. The composite
+-- reader (`rental rank`) sums weighted sub-scores out of it.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS zip_scores (
+    zcta5             VARCHAR,
+    state             VARCHAR,
+    metro             VARCHAR,
+    county_name       VARCHAR,
+    yield_score       DOUBLE,
+    demand_score      DOUBLE,
+    supply_score      DOUBLE,
+    operability_score DOUBLE,
+    risk_score        DOUBLE,
+    snapshot_date     DATE,
+    PRIMARY KEY (zcta5, snapshot_date)
+);
