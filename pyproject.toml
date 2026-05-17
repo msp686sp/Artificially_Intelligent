@@ -21,6 +21,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0",
+    "pytest-asyncio>=0.23",
     "ruff>=0.5",
 ]
 # Needed only for the real CBSA delineation xlsx fetch. Tests use a
@@ -28,12 +29,25 @@ dev = [
 xlsx = [
     "openpyxl>=3.1",
 ]
+# ------------------------------------------------------------------
+# GUI extra — FastAPI backend stack used by the gooey. Owned by agent-1
+# (api-core); other agents extend additively in their own labeled block.
+# httpx is already in core dependencies and re-used by TestClient.
+# ------------------------------------------------------------------
+gui = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic-settings>=2.4",
+    "python-multipart>=0.0.9",
+]
 
 [project.scripts]
 rental = "rental.cli:cli"
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["src", "."]
+include = ["rental*", "api*"]
+exclude = ["tests*", "frontend*", "docs*", "data*", "config*", "notebooks*"]
 
 [tool.setuptools.package-data]
 "rental.db" = ["*.sql"]
@@ -46,6 +60,15 @@ target-version = "py311"
 [tool.ruff.lint]
 select = ["E", "F", "I", "W", "UP", "B"]
 
+# B008 (function-call-in-default) trips on FastAPI's idiomatic
+# ``Depends(...)`` / ``Body(...)`` defaults. Allowed in route modules.
+[tool.ruff.lint.per-file-ignores]
+"api/routes/*.py" = ["B008"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra"
+# importlib mode prevents the ``tests/api`` package from shadowing the
+# top-level ``api`` package during test collection.
+addopts = "-ra --import-mode=importlib"
+asyncio_mode = "auto"
+pythonpath = [".", "src"]

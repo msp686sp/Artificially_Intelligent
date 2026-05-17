@@ -1,4 +1,5 @@
-.PHONY: init install refresh refresh-fixture score rank smoke test lint ci doctor status clean
+.PHONY: init install refresh refresh-fixture score rank smoke test lint ci doctor status clean \
+        gui-install gui-api-dev
 
 PYTHON ?= python3
 RANK_OUT ?= data/rankings/price_rank.csv
@@ -67,3 +68,17 @@ doctor:
 
 clean:
 	rm -rf data/warehouse.duckdb data/raw data/interim data/snapshots data/rankings data/manifest.json
+
+# ============================================================
+# GUI (the "gooey") — see docs/gooey-plan.md.
+# Owned by agent-1 (api-core); other agents extend with their own targets.
+# ============================================================
+
+# Install the rental package with the GUI extras (FastAPI + uvicorn + ...).
+gui-install:
+	$(PYTHON) -m pip install -e ".[gui,dev]"
+
+# Run the FastAPI app with hot-reload on :8000. CORS is open to the Vite
+# dev server (:5173). OpenAPI docs at http://localhost:8000/docs.
+gui-api-dev:
+	$(PYTHON) -m uvicorn api.main:app --reload --port 8000
