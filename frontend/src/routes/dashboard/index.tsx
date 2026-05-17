@@ -9,7 +9,7 @@ import { Progress } from "@/components/Progress";
 import { useToast } from "@/components/Toast";
 import { useSources } from "@/hooks/useSources";
 import { useManifest } from "@/hooks/useManifest";
-import { useRankings, useVersion } from "@/hooks/useVersion";
+import { useHealth, useRankings, useVersion } from "@/hooks/useVersion";
 import { useRefreshJob } from "@/hooks/useRefreshJob";
 import { formatTimestamp } from "@/lib/source-meta";
 
@@ -18,11 +18,15 @@ export default function DashboardPage() {
   const manifest = useManifest();
   const rankings = useRankings(5);
   const version = useVersion();
+  const health = useHealth();
   const refreshJob = useRefreshJob();
   const toast = useToast();
   const qc = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
   const [computing, setComputing] = useState(false);
+
+  const warehouseInitialized = health.data?.warehouse?.initialized !== false;
+  const zipCount = health.data?.warehouse?.zips ?? 0;
 
   const stats = useMemo(() => {
     const list = sources.data ?? [];
@@ -100,8 +104,36 @@ export default function DashboardPage() {
     state?: string;
   }>;
 
+  if (!warehouseInitialized) {
+    return (
+      <div data-testid="dashboard-root" className="stack" style={{ gap: "1.5rem" }}>
+        <Card title="Warehouse not initialized">
+          <div data-testid="dashboard-empty-state" className="stack" style={{ gap: "0.75rem" }}>
+            <p className="muted">
+              The DuckDB warehouse hasn&apos;t been built yet. Run the
+              bootstrap command from a terminal in the repo root to fetch
+              source fixtures and populate the warehouse.
+            </p>
+            <code
+              data-testid="dashboard-empty-cta-init"
+              style={{
+                display: "inline-block",
+                padding: "0.5rem 0.75rem",
+                borderRadius: "0.375rem",
+                background: "var(--bg-subtle, #1a1a1a)",
+                fontFamily: "monospace",
+              }}
+            >
+              make init
+            </code>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <div className="stack" style={{ gap: "1.5rem" }}>
+    <div data-testid="dashboard-root" className="stack" style={{ gap: "1.5rem" }}>
       <header className="row">
         <h1 style={{ margin: 0 }}>Dashboard</h1>
         <div className="spacer" />
@@ -109,6 +141,7 @@ export default function DashboardPage() {
           Reload
         </button>
         <button
+          data-testid="dashboard-quick-refresh-all"
           className="primary"
           onClick={refreshAll}
           disabled={refreshing}
@@ -117,6 +150,7 @@ export default function DashboardPage() {
           {refreshing ? "Refreshing…" : "Refresh all"}
         </button>
         <button
+          data-testid="dashboard-quick-compute-rank"
           onClick={computeMarketScore}
           disabled={computing}
           aria-label="Compute MarketScore"
@@ -139,10 +173,18 @@ export default function DashboardPage() {
       )}
 
       <section className="grid cards" aria-label="Top-line metrics">
-        <Stat label="Sources OK" value={stats.ok} hint={`${stats.total} total`} />
-        <Stat label="Sources stale" value={stats.stale} />
-        <Stat label="Sources errored" value={stats.errored} />
-        <Stat label="Warehouse rows" value={stats.warehouseRows.toLocaleString()} />
+        <div data-testid="dashboard-stat-sources-ok">
+          <Stat label="Sources OK" value={stats.ok} hint={`${stats.total} total`} />
+        </div>
+        <div data-testid="dashboard-stat-sources-stale">
+          <Stat label="Sources stale" value={stats.stale} />
+        </div>
+        <div data-testid="dashboard-stat-sources-error">
+          <Stat label="Sources errored" value={stats.errored} />
+        </div>
+        <div data-testid="dashboard-stat-zip-count">
+          <Stat label="ZIPs in warehouse" value={zipCount.toLocaleString()} />
+        </div>
       </section>
 
       <Card
@@ -157,21 +199,38 @@ export default function DashboardPage() {
             populate.
           </div>
         ) : topRows.length === 0 ? (
-          <div className="muted">No rankings yet.</div>
+          <table data-testid="dashboard-top5-table">
+            <tbody>
+              <tr>
+                <td className="muted">No rankings yet.</td>
+              </tr>
+            </tbody>
+          </table>
         ) : (
-          <ol style={{ paddingLeft: "1.25rem", margin: 0 }}>
-            {topRows.map((r) => (
-              <li key={r.zcta5}>
-                <Link to={`/rankings/${r.zcta5}`}>
-                  {r.zcta5}
-                  {r.state ? ` (${r.state})` : ""}
-                </Link>
-                {typeof r.market_score === "number" && (
-                  <span className="muted"> — {r.market_score.toFixed(2)}</span>
-                )}
-              </li>
-            ))}
-          </ol>
+          <table data-testid="dashboard-top5-table">
+            <thead>
+              <tr>
+                <th>ZIP</th>
+                <th>State</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {topRows.map((r) => (
+                <tr key={r.zcta5}>
+                  <td>
+                    <Link to={`/rankings/${r.zcta5}`}>{r.zcta5}</Link>
+                  </td>
+                  <td>{r.state ?? ""}</td>
+                  <td>
+                    {typeof r.market_score === "number"
+                      ? r.market_score.toFixed(2)
+                      : ""}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </Card>
 
@@ -199,7 +258,9 @@ export default function DashboardPage() {
         </Card>
 
         <Card title="Last backtest">
-          <div className="muted">{lastBacktest}</div>
+          <div data-testid="dashboard-recent-backtest" className="muted">
+            {lastBacktest}
+          </div>
         </Card>
 
         <Card title="Version">

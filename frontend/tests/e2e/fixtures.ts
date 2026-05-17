@@ -156,29 +156,32 @@ const STABILITY_CSS = `
 `;
 
 /**
- * Inject a Date freeze so any relative timestamps render identically.
- * Runs before any page script via addInitScript.
+ * Freeze the page clock so any relative timestamps render identically.
+ *
+ * NOTE: We previously installed a hand-rolled Date proxy via
+ * `addInitScript`, but reassigning the global `Date` constructor before
+ * React mounted caused `<div id="root">` to stay empty (React's
+ * scheduler dereferences `Date` during bootstrap and the proxy lost
+ * methods like `[Symbol.hasInstance]`). Playwright 1.45+ ships a
+ * `page.clock` API that overrides Date/timers cleanly without
+ * trampling the global, so we use that instead.
  */
-const FREEZE_DATE_SCRIPT = (frozen: number) => `
-  (() => {
-    const _Date = Date;
-    const frozen = ${frozen};
-    function FrozenDate(...args) {
-      if (args.length === 0) return new _Date(frozen);
-      return new _Date(...args);
-    }
-    FrozenDate.now = () => frozen;
-    FrozenDate.UTC = _Date.UTC;
-    FrozenDate.parse = _Date.parse;
-    FrozenDate.prototype = _Date.prototype;
-    // eslint-disable-next-line no-global-assign
-    Date = FrozenDate;
-  })();
-`;
+async function freezeClock(page: Page, frozen: number) {
+  await page.clock.install({ time: new Date(frozen) });
+}
 
 async function installApiMocks(page: Page, overrides: Map<string, unknown>) {
   await page.route("**/api/**", async (route) => {
     const url = new URL(route.request().url());
+
+    // The glob `**/api/**` also matches paths like `/src/api/client.ts`
+    // (which Vite serves as module scripts in dev). Anything that isn't
+    // an actual `/api/...` request must fall through to the dev server
+    // or React will fail to mount.
+    if (!url.pathname.startsWith("/api/")) {
+      await route.fallback();
+      return;
+    }
 
     // Per-test overrides take precedence over the global routing table.
     for (const [pattern, body] of overrides.entries()) {
@@ -243,7 +246,7 @@ export const test = base.extend<Fixtures>({
   },
 
   page: async ({ page, apiOverrides }, use) => {
-    await page.addInitScript({ content: FREEZE_DATE_SCRIPT(FROZEN_NOW) });
+    await freezeClock(page, FROZEN_NOW);
     await page.addStyleTag({ content: STABILITY_CSS }).catch(() => {
       // addStyleTag fires before navigation — swallow until a doc exists.
     });
