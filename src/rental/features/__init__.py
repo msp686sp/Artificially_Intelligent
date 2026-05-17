@@ -12,10 +12,15 @@ from rental.features.demand_features import (
     wage_weighted_job_cagr_5yr,
 )
 from rental.features.redfin_features import redfin_features
+from rental.features.supply_features import (
+    county_supply_features,
+    zcta_supply_features,
+)
 from rental.features.yield_features import yield_features
 from rental.features.zhvi import latest_zhvi_per_zip
 
 __all__ = [
+    "county_supply_features",
     "demand_features",
     "hh_income_growth_5yr",
     "latest_zhvi_per_zip",
@@ -23,4 +28,5 @@ __all__ = [
     "redfin_features",
     "wage_weighted_job_cagr_5yr",
     "yield_features",
+    "zcta_supply_features",
 ]

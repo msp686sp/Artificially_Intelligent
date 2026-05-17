@@ -20,17 +20,20 @@ demand_score:
   net_migration_per_1000: 0.35
   hh_income_growth: 0.25
 
-# SupplyScore consumes Redfin-derived features (no Redfin-specific subscore).
-# Weights are stubbed; final values land in Phase 3 alongside permits + vacancy.
-#   dom_yoy_delta:        positive = market softening / supply pressure up
-#   inventory_yoy_change: positive = more supply
+# SupplyScore (Phase 3). Negative weights — higher supply pressure (permits
+# per existing unit, multifamily share, rising DOM, rising inventory) is
+# bad for rent growth. Within-state z-scoring keeps cross-state volume
+# differences from dominating.
 supply_score:
-  # redfin-agent features (weights tuned in Phase 3):
+  permits_per_1000: -0.5
+  multifamily_share: -0.3
+  supply_pressure_index: -0.2
+  # Redfin-derived (final weights land alongside the permits coefficients):
   dom_yoy_delta: null
   inventory_yoy_change: null
 
-# OperabilityScore also borrows DOM levels (high DOM = illiquidity, an
-# operator cost beyond cash flow). Final weights land in Phase 4.
+# OperabilityScore (Phase 4). DOM levels reflect illiquidity at exit —
+# an operator cost beyond cash flow.
 #   dom_3mo_avg:          high = harder to exit (illiquidity penalty)
 #   sale_to_list_3mo_avg: <1.0 = buyer's market (weaker disposition leverage)
 operability_score:
