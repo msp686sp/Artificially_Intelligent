@@ -29,6 +29,7 @@ For a real refresh against Zillow's CDN (requires outbound network to
 ```bash
 make refresh         # fetch + load ZHVI from the public CSV
 make score           # write data/rankings/price_rank.csv
+make rank            # composite MarketScore + hard filters → data/rankings/market_score.csv
 ```
 
 ## Layout

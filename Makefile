@@ -1,7 +1,8 @@
-.PHONY: init install refresh refresh-fixture score smoke test lint clean
+.PHONY: init install refresh refresh-fixture score rank smoke test lint clean
 
 PYTHON ?= python3
 RANK_OUT ?= data/rankings/price_rank.csv
+MARKET_RANK_OUT ?= data/rankings/market_score.csv
 
 install:
 	$(PYTHON) -m pip install -e ".[dev]"
@@ -21,6 +22,12 @@ refresh-fixture:
 
 score:
 	$(PYTHON) -m rental.cli score --output $(RANK_OUT)
+
+# Composite MarketScore: reads zip_scores, applies hard filters,
+# writes the ranked CSV. No-op outputs an empty CSV if sub-scores
+# haven't been produced yet.
+rank:
+	$(PYTHON) -m rental.cli rank --output $(MARKET_RANK_OUT)
 
 # Phase 0 smoke: init schema, load fixture, write a price-ranked CSV.
 # Proves the end-to-end ETL → query → output path with no network.

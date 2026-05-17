@@ -28,6 +28,10 @@ rental = "rental.cli:cli"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+"rental.db" = ["*.sql"]
+"rental.scoring" = ["*.sql"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"
