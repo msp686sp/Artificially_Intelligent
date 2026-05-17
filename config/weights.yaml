@@ -13,10 +13,25 @@ yield_score:
   effective_tax_rate: 0.30        # applied as -z
   insurance_rate: 0.20            # applied as -z
 
-# DemandScore, SupplyScore, OperabilityScore, RiskScore land in their
-# respective phases. Stubbed here for forward visibility.
+# DemandScore, SupplyScore land in their respective phases.
 
 demand_score: {}
 supply_score: {}
-operability_score: {}
-risk_score: {}
+
+# OperabilityScore — within-state z-scores. Negative weights on features
+# where smaller = better (tax, insurance, eviction). Phase 4 launch values;
+# re-tuned in Phase 6 backtest.
+operability_score:
+  effective_tax_rate: -0.40
+  insurance_rate_estimate: -0.30
+  eviction_filing_rate: -0.30
+
+# RiskScore — national z-scores on FEMA NRI scores. All negative because
+# higher hazard should pull the composite down. Phase 5 will add an
+# employer-HHI concentration term; the weights below sum to <1 to leave
+# room for it.
+risk_score:
+  climate_risk_score: -0.50
+  flood_risk: -0.15
+  wildfire_risk: -0.15
+  hurricane_risk: -0.20
