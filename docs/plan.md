@@ -13,13 +13,13 @@ Every choice below traces back to a confirmed decision; nothing is speculative.
 | Source of edge | Doing the basics rigorously |
 | Geographic grain | Zip-code level (ZCTA), nationwide |
 | Data budget | Free + scraped only |
-| Cadence | Monthly refresh + event triggers on metric threshold crossings |
+| Cadence | Monthly refresh + event triggers on **market-metric threshold crossings** (no corporate news scraping, no regulatory feeds in v1) |
 | Tenant risk | First-class scoring dimension (`OperabilityScore`) |
-| Filters | Configurable hard filters + soft scoring (defaults: price band + minimum yield) |
+| Filters | Configurable hard filters + soft scoring (default ON: **price band $80k–$250k** only; regulation/climate/population filters available but OFF by default) |
 | Portfolio | Tracked as metadata only; does not change recommendations |
 | Outputs | Layered: Jupyter notebook + local dashboard + weekly email digest |
-| Backtest target | Test multiple targets (5yr total return, cash-flow+rent-growth, risk-adjusted), compare |
-| Funnel depth | Platform ends at the zip code (no per-property underwriter) |
+| Backtest target | **5-year levered cash-on-cash + appreciation, combined** (single primary target; other definitions computed but not used for weight tuning) |
+| Funnel depth | v1 ends at the zip code. **v2 adds a property-level underwriter** that takes an address + price + rehab and runs the standardized pro forma against zip-level market inputs. |
 
 ## Final scoring model
 
@@ -36,13 +36,22 @@ Weights tuned against the backtest in Phase 6. Operability gets meaningful
 weight because of the SFR-cash-flow thesis: a zip with great yield but
 bad operator outcomes is a trap, and the scorecard must say so.
 
-Default hard filters (configurable via YAML):
+Default hard filters (configurable via YAML). Only the price band and a
+data-quality minimum are ON by default — everything else is opt-in so the
+universe of zips you'll consider isn't silently pre-narrowed beyond your
+non-negotiable.
 
 ```yaml
 filters:
-  median_home_price: { min: 80000, max: 250000 }
-  gross_yield_monthly_pct: { min: 0.8 }   # rent/price > 0.8% per month
-  zori_coverage: { min: 24 }              # months of rent data available
+  # ON by default
+  median_home_price: { min: 80000, max: 250000, enabled: true }
+  zori_coverage:     { min: 24, enabled: true }     # months of rent data available
+
+  # OFF by default — opt in when/if you want them
+  gross_yield_monthly_pct:    { min: 0.8, enabled: false }
+  exclude_rent_controlled:    { enabled: false }
+  exclude_high_climate_risk:  { enabled: false }
+  exclude_shrinking_metros:   { population_cagr_min: -0.0025, enabled: false }
 ```
 
 ---
@@ -212,23 +221,44 @@ Scoring:
 
 **Deliverable:** final `MarketScore` formula complete.
 
-### Phase 6 — Backtest harness (1.5 weeks) — *the validation gate*
+### Phase 6 — Backtest harness (1 week) — *the validation gate*
 
 No weight is trusted until this passes.
 
+**Primary target — what the scorecard is tuned against:**
+
+```
+LeveredTotalReturn_5yr(zip) =
+    Σ over 5 years of [annual_cash_flow × (1 / cash_invested)]    # CoC contribution
+  + [(ZHVI_t+5 − ZHVI_t) × leverage_ratio] / cash_invested        # appreciation × leverage
+```
+
+with standard assumptions held constant across zips:
+- 25% down, 30yr fixed at prevailing rate as of snapshot date
+- 10% PM, 8% maintenance, 5% capex reserve, 7% vacancy
+- Tax/insurance from zip features
+
+Secondary targets — computed but not used for weight tuning, reported alongside for context:
+- Year-1 CoC only
+- 5yr rent-growth-only (ZORI CAGR)
+- Risk-adjusted version (return / σ)
+
+Method:
 - Reconstruct feature snapshots as of Jan 2013, 2014, ..., 2019 using only data available at that time (point-in-time feature store)
-- Compute three target outcomes per zip per snapshot:
-  - **Total return (5yr leveraged)** — ZHVI appreciation × leverage + cumulative ZORI rent growth
-  - **Cash flow + rent growth** — Year-1 CoC at standard assumptions + 5yr ZORI CAGR
-  - **Risk-adjusted total return** — total return discounted by realized vacancy and eviction proxies
-- For each target, compute Spearman rank correlation between `MarketScore` and realized outcome
-- Bucket zips into score quintiles; chart realized outcome distribution per quintile per target
-- Walk-forward: train weights on 2013–17 windows, validate on 2018–22 windows; compare to baseline (yield-only, equal-weighted, random)
-- Tune weights per-target; identify a weight set that generalizes (doesn't optimize for one target at the cost of the others)
+- Compute realized `LeveredTotalReturn_5yr` per zip per snapshot
+- Spearman rank correlation between `MarketScore` and realized return
+- Bucket zips into score quintiles; chart realized outcome distribution per quintile
+- Walk-forward: train weights on 2013–17 windows, validate on 2018–22 windows
+- Baselines to beat: yield-only ranking, equal-weighted dimensions, random
+- Tune weights against the primary target only
 
-**Deliverable:** `backtest_report.html` showing score vs. outcome for each of the three targets, with confidence intervals and recommended weights. If the top quintile doesn't beat the bottom across at least two of three targets, the platform isn't ready — iterate on features before going further.
+**Deliverable:** `backtest_report.html` showing score vs. realized levered total return per snapshot, with confidence intervals, walk-forward stability, and the recommended weights. If the top quintile doesn't beat the bottom quintile on the primary target with statistical significance, the scorecard isn't ready — iterate on features and weights before going further.
 
-### Phase 7 — Event-trigger alerting (1 week)
+### Phase 7 — Event-trigger alerting (3 days)
+
+Scope tightened: v1 alerts only on **market-metric threshold crossings**.
+No corporate news scraping, no regulatory feed monitoring, no distress-spike
+detectors — those can come later if the simple version proves valuable.
 
 - `rental refresh` writes a versioned monthly snapshot to `data/snapshots/<yyyy-mm>.parquet`
 - `rental alerts compute` diffs the latest snapshot against the prior, detects metric crossings per `config/watchlist.yaml` rules
@@ -260,6 +290,21 @@ Pages:
 
 ---
 
+## v2 roadmap — Property-level underwriter
+
+Once v1 is trusted and used weekly, v2 layers a per-property pro forma on
+top. Explicitly out of scope until the market scorecard has earned its
+keep.
+
+- `rental underwrite <address> --price <p> --rehab <r>` CLI
+- Geocode → resolve to zip → pull zip's market features (tax rate, insurance estimate, ZORI rent, ZHVI price)
+- Run the standardized pro forma with stress scenarios (rent ±10%, vacancy +5pp, rate ±1pp)
+- Output a one-page underwrite: CoC, cap rate, IRR, breakeven rent, breakeven price
+- Dashboard page accepts the same inputs
+- No listings scraping, no off-market sourcing — those are v3+ if at all
+
+---
+
 ## Risks and mitigations
 
 | Risk | Likelihood | Mitigation |
@@ -284,12 +329,14 @@ Pages:
 | 3. Supply | 3 days | 2w 5d |
 | 4. Operability | 1 week | 3w 5d |
 | 5. Risk modifiers | 3 days | 4w 3d |
-| 6. Backtest harness | 1.5 weeks | 6w |
-| 7. Alerts + digest | 1 week | 7w |
-| 8. Dashboard | 1 week | 8w |
+| 6. Backtest harness | 1 week | 5w 3d |
+| 7. Alerts + digest | 3 days | 6w 1d |
+| 8. Dashboard | 1 week | 7w 1d |
 | 9. Polish | ongoing | — |
 
-~8 weeks of focused part-time work to a validated, used-weekly platform.
+~7 weeks of focused part-time work to a validated, used-weekly platform.
+Scope tightenings in Phase 6 (single primary target) and Phase 7
+(metric crossings only) shaved roughly a week off the original estimate.
 
 ---
 
