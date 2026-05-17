@@ -47,7 +47,7 @@ export default function LogsPage() {
   };
 
   return (
-    <div className="stack" style={{ gap: "1.5rem" }}>
+    <div className="stack" style={{ gap: "1.5rem" }} data-testid="logs-root">
       <header className="row">
         <h1 style={{ margin: 0 }}>Refresh log</h1>
         <div className="spacer" />
@@ -118,6 +118,7 @@ export default function LogsPage() {
           <div className="empty-state">Could not load refresh log.</div>
         ) : (
           <DataTable<RefreshLogRow>
+            data-testid="logs-table"
             columns={[
               {
                 key: "id",

@@ -31,7 +31,7 @@ export default function ManifestPage() {
   }, [manifest.data, statusFilter, search]);
 
   return (
-    <div className="stack" style={{ gap: "1.5rem" }}>
+    <div className="stack" style={{ gap: "1.5rem" }} data-testid="manifest-root">
       <header className="row">
         <h1 style={{ margin: 0 }}>Manifest</h1>
         <div className="spacer" />
@@ -58,6 +58,7 @@ export default function ManifestPage() {
                 setStatusFilter(e.target.value as "" | SourceStatus)
               }
               aria-label="Filter by status"
+              data-testid="manifest-filter-status"
             >
               {STATUS_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -78,11 +79,16 @@ export default function ManifestPage() {
           <div className="empty-state">Could not load manifest.</div>
         ) : (
           <DataTable<ManifestEntry>
+            data-testid="manifest-table"
             columns={[
               {
                 key: "source",
                 header: "Source",
-                accessor: (r) => <Link to={`/sources/${r.source}`}>{r.source}</Link>,
+                accessor: (r) => (
+                  <span data-testid={`manifest-row-${r.source}`}>
+                    <Link to={`/sources/${r.source}`}>{r.source}</Link>
+                  </span>
+                ),
                 sortValue: (r) => r.source,
                 sortable: true,
               },
@@ -102,7 +108,7 @@ export default function ManifestPage() {
               },
               {
                 key: "age",
-                header: "Age",
+                header: <span data-testid="manifest-sort-age">Age</span>,
                 accessor: (r) => formatAge(r.age_seconds),
                 sortValue: (r) =>
                   r.age_seconds === null || r.age_seconds === undefined
