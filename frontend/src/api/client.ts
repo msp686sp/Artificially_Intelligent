@@ -81,6 +81,43 @@ export const api = {
     request<T>("DELETE", path, { query, signal }),
 };
 
+// Back-compat named exports — older route code expects them. The
+// 2nd arg may be either a query object or an AbortSignal; we detect
+// which at call time so consumers that wrote ``apiGet(path, signal)``
+// keep working alongside the canonical ``api.get(path, query, signal)``.
+function _isSignal(value: unknown): value is AbortSignal {
+  return typeof AbortSignal !== "undefined" && value instanceof AbortSignal;
+}
+
+export function apiGet<T>(path: string, queryOrSignal?: Query | AbortSignal, signal?: AbortSignal): Promise<T> {
+  if (_isSignal(queryOrSignal)) return api.get<T>(path, undefined, queryOrSignal);
+  return api.get<T>(path, queryOrSignal as Query | undefined, signal);
+}
+export function apiPost<T>(path: string, body?: unknown, queryOrSignal?: Query | AbortSignal, signal?: AbortSignal): Promise<T> {
+  if (_isSignal(queryOrSignal)) return api.post<T>(path, body, undefined, queryOrSignal);
+  return api.post<T>(path, body, queryOrSignal as Query | undefined, signal);
+}
+export function apiPut<T>(path: string, body?: unknown, queryOrSignal?: Query | AbortSignal, signal?: AbortSignal): Promise<T> {
+  if (_isSignal(queryOrSignal)) return api.put<T>(path, body, undefined, queryOrSignal);
+  return api.put<T>(path, body, queryOrSignal as Query | undefined, signal);
+}
+export function apiDel<T>(path: string, queryOrSignal?: Query | AbortSignal, signal?: AbortSignal): Promise<T> {
+  if (_isSignal(queryOrSignal)) return api.del<T>(path, undefined, queryOrSignal);
+  return api.del<T>(path, queryOrSignal as Query | undefined, signal);
+}
+
+/** Build the WebSocket URL for the /api/events stream. Relative protocol
+ * so it picks up ws://localhost:5173 in dev (Vite proxy) and wss://...
+ * if the app is served over HTTPS. */
+export function wsUrl(path: string, query?: Record<string, string | undefined>): string {
+  const proto = typeof window !== "undefined" && window.location.protocol === "https:" ? "wss:" : "ws:";
+  const host = typeof window !== "undefined" ? window.location.host : "localhost";
+  const qs = new URLSearchParams();
+  for (const [k, v] of Object.entries(query ?? {})) if (v) qs.set(k, v);
+  const search = qs.toString();
+  return `${proto}//${host}${path}${search ? `?${search}` : ""}`;
+}
+
 /**
  * Centralized React Query key registry. Using a registry (rather than
  * inline literals) keeps invalidation predictable across the app — when

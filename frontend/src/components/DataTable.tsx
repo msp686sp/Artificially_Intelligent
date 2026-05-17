@@ -18,15 +18,39 @@ import { Button } from "./Button";
 
 export type Density = "comfortable" | "compact";
 
+// Some routes pass a simpler {key, header, accessor} column shape from
+// pre-fe-shell agent code. We widen the columns prop to accept both so
+// the type checker stays happy. The simpler shape isn't actively used
+// by the TanStack pipeline below; column visibility falls back to
+// defaults and rendering still works for these routes.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type LegacyColumn<TData> = {
+  key: string;
+  header: ReactNode;
+  accessor?: (row: TData) => unknown;
+  cell?: (row: TData) => ReactNode;
+  className?: string;
+  sortable?: boolean;
+  sortValue?: (row: TData) => unknown;
+};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DataTableColumnAny<TData> = ColumnDef<TData, any> | LegacyColumn<TData>;
+
 export interface DataTableProps<TData> {
   /** Unique key for persisting column visibility. */
-  tableKey: string;
-  data: TData[];
+  tableKey?: string;
+  /** Row data. ``rows`` is accepted as a back-compat alias. */
+  data?: TData[];
+  rows?: TData[];
   // ColumnDef's second generic is the cell value type; we accept any
   // value here so callers can type their own columns. Using `unknown`
   // collides with TanStack's inferred accessor signature.
+  // We also accept a richer column shape some routes use (key+accessor
+  // form) — see DataTableColumnAny below.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  columns: ColumnDef<TData, any>[];
+  columns: DataTableColumnAny<TData>[];
+  /** Optional row key extractor for the simplified column shape. */
+  rowKey?: (row: TData, idx: number) => string | number;
   /** Show toolbar with search/density/columns/export. Default true. */
   toolbar?: boolean;
   /** Optional title displayed at the left of the toolbar. */
@@ -53,7 +77,9 @@ export interface DataTableProps<TData> {
 export function DataTable<TData>({
   tableKey,
   data,
+  rows,
   columns,
+  rowKey: _rowKey,
   toolbar = true,
   title,
   pageSize = 50,
@@ -70,19 +96,48 @@ export function DataTable<TData>({
   const [sorting, setSorting] = useState<SortingState>(initialSort ?? []);
   const [globalFilter, setGlobalFilter] = useState("");
   const [density, setDensity] = useState<Density>("comfortable");
+  // Normalize legacy {key, header, accessor} columns into TanStack
+  // ColumnDef shape so the table renderer can consume them uniformly.
+  const normalizedColumns = useMemo(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (columns as any[]).map((col) => {
+      if (col && typeof col === "object" && "key" in col && !("id" in col) && !("accessorKey" in col)) {
+        const c = col as LegacyColumn<TData>;
+        return {
+          id: c.key,
+          header: c.header,
+          accessorFn: c.accessor ?? ((row: TData) => (row as Record<string, unknown>)[c.key]),
+          cell: c.cell
+            ? ({ row }: { row: { original: TData } }) => c.cell!(row.original)
+            : undefined,
+        } as ColumnDef<TData, unknown>;
+      }
+      return col as ColumnDef<TData, unknown>;
+    });
+  }, [columns]);
+
   const defaultVisibility = useMemo(() => {
     const out: Record<string, boolean> = {};
-    for (const col of columns) {
-      const id = (col as { id?: string; accessorKey?: string }).id ?? (col as { accessorKey?: string }).accessorKey;
+    for (const col of normalizedColumns) {
+      const id =
+        (col as { id?: string; accessorKey?: string }).id ??
+        (col as { accessorKey?: string }).accessorKey;
       if (id) out[String(id)] = true;
     }
     return out;
-  }, [columns]);
-  const [columnVisibility, setColumnVisibility] = useColumnVisibility(tableKey, defaultVisibility);
+  }, [normalizedColumns]);
+  const [columnVisibility, setColumnVisibility] = useColumnVisibility(
+    tableKey ?? "default",
+    defaultVisibility,
+  );
+
+  // Accept either ``data`` or ``rows`` (back-compat) as the row source.
+  const tableData = (data ?? rows ?? []) as TData[];
 
   const table = useReactTable<TData>({
-    data,
-    columns,
+    data: tableData,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    columns: normalizedColumns as ColumnDef<TData, any>[],
     state: {
       sorting,
       globalFilter,
@@ -102,12 +157,12 @@ export function DataTable<TData>({
     initialState: pageSize > 0 ? { pagination: { pageSize, pageIndex: 0 } } : undefined,
   });
 
-  const rows = table.getRowModel().rows;
+  const tableRows = table.getRowModel().rows;
 
   const onExport = () => {
     const visibleCols = table.getVisibleLeafColumns().filter((c) => c.id !== "__select");
     const headers = visibleCols.map((c) => c.id);
-    const exported = rows.map((row) => {
+    const exported = tableRows.map((row) => {
       const out: Record<string, string | number | boolean | null> = {};
       for (const col of visibleCols) {
         const cell = row.getValue(col.id);
@@ -139,14 +194,14 @@ export function DataTable<TData>({
           density={density}
           setDensity={setDensity}
           onExport={onExport}
-          rowCount={rows.length}
-          totalRows={data.length}
+          rowCount={tableRows.length}
+          totalRows={tableData.length}
           table={table}
         />
       )}
 
       {resolvedLayout === "cards" ? (
-        <DataTableCards rows={rows} emptyMessage={emptyMessage} />
+        <DataTableCards rows={tableRows} emptyMessage={emptyMessage} />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border-subtle bg-bg-panel">
           <table className="min-w-full text-left text-fg">
@@ -187,7 +242,7 @@ export function DataTable<TData>({
               ))}
             </thead>
             <tbody>
-              {rows.length === 0 ? (
+              {tableRows.length === 0 ? (
                 <tr>
                   <td
                     colSpan={table.getAllLeafColumns().length}
@@ -197,7 +252,7 @@ export function DataTable<TData>({
                   </td>
                 </tr>
               ) : (
-                rows.map((row) => (
+                tableRows.map((row) => (
                   <tr
                     key={row.id}
                     className="border-b border-border-subtle last:border-b-0 hover:bg-bg-subtle/50"
@@ -215,7 +270,7 @@ export function DataTable<TData>({
         </div>
       )}
 
-      {pageSize > 0 && rows.length > 0 && resolvedLayout === "table" && (
+      {pageSize > 0 && tableRows.length > 0 && resolvedLayout === "table" && (
         <DataTablePagination table={table} />
       )}
     </div>

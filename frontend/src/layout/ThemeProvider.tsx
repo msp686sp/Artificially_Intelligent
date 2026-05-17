@@ -1,4 +1,4 @@
-/* eslint-disable react-refresh/only-export-components */
+// (intentional: this module exports both a hook and a component)
 import { createContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 export type Theme = "dark" | "light" | "auto";
@@ -97,3 +97,25 @@ export { useTheme } from "@/hooks/useTheme";
 
 // Note: `resolveTheme` is exported only for unit testing.
 export { resolveTheme };
+
+// Mobile bottom-nav opt-out toggle. Settings page reads/writes this.
+const MOBILE_NAV_KEY = "rental.gooey.mobileNav";
+
+export function getMobileNavEnabled(): boolean {
+  if (typeof window === "undefined") return true;
+  try {
+    const raw = window.localStorage.getItem(MOBILE_NAV_KEY);
+    return raw === null ? true : raw === "1";
+  } catch {
+    return true;
+  }
+}
+
+export function setMobileNavEnabled(enabled: boolean): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(MOBILE_NAV_KEY, enabled ? "1" : "0");
+  } catch {
+    /* ignore */
+  }
+}

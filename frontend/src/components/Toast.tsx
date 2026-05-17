@@ -1,4 +1,5 @@
-/* eslint-disable react-refresh/only-export-components */
+// (intentional: this module exports both a hook and a component;
+// the react-refresh constraint is not enforced in this project)
 import {
   createContext,
   useCallback,
@@ -22,9 +23,13 @@ export interface Toast {
   durationMs?: number;
 }
 
+type PushArg = string | (Omit<Toast, "id"> & { id?: string });
+
 interface ToastContextValue {
   toasts: Toast[];
-  push: (toast: Omit<Toast, "id"> & { id?: string }) => string;
+  /** Push a toast. Accepts a string shorthand (info-tone title-only)
+   *  or a full Toast object. Returns the toast id. */
+  push: (toast: PushArg) => string;
   dismiss: (id: string) => void;
   clear: () => void;
 }
@@ -49,9 +54,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const push = useCallback(
-    (toast: Omit<Toast, "id"> & { id?: string }) => {
-      const id = toast.id ?? uid();
-      const t: Toast = { durationMs: 4000, ...toast, id };
+    (toast: PushArg) => {
+      const obj =
+        typeof toast === "string"
+          ? { tone: "info" as const, title: toast }
+          : toast;
+      const id = obj.id ?? uid();
+      const t: Toast = { durationMs: 4000, ...obj, id };
       setToasts((prev) => [...prev, t]);
       if (t.durationMs && t.durationMs > 0) {
         const handle = setTimeout(() => dismiss(id), t.durationMs);
@@ -93,7 +102,20 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 export function useToast() {
   const ctx = useContext(ToastContext);
   if (!ctx) throw new Error("useToast must be used inside <ToastProvider>");
-  return ctx;
+  // Back-compat: expose tone-specific helpers (success/error/info/warning)
+  // alongside the canonical push/dismiss/clear API. Agent 5's routes
+  // were authored against this idiom — keep it stable.
+  const helpers = {
+    success: (title: string, description?: string) =>
+      ctx.push({ tone: "success", title, description }),
+    error: (title: string, description?: string) =>
+      ctx.push({ tone: "error", title, description }),
+    info: (title: string, description?: string) =>
+      ctx.push({ tone: "info", title, description }),
+    warning: (title: string, description?: string) =>
+      ctx.push({ tone: "warning", title, description }),
+  };
+  return { ...ctx, ...helpers };
 }
 
 const TONE_STYLES: Record<ToastTone, string> = {

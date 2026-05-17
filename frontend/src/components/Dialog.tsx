@@ -9,6 +9,9 @@ interface DialogProps {
   description?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
+  /** Back-compat alias for ``footer`` — agent 5's confirmation dialogs
+   * pass action buttons via this prop. */
+  actions?: ReactNode;
   /** Visual width. Defaults to md (max-w-md). */
   size?: "sm" | "md" | "lg" | "xl";
   className?: string;
@@ -32,9 +35,11 @@ export function Dialog({
   description,
   children,
   footer,
+  actions,
   size = "md",
   className,
 }: DialogProps) {
+  const resolvedFooter = footer ?? actions;
   return (
     <Transition show={open} as={Fragment}>
       <HDialog as="div" className="relative z-50" onClose={onClose}>
@@ -81,7 +86,9 @@ export function Dialog({
                   </div>
                 )}
                 <div className="text-sm">{children}</div>
-                {footer && <div className="mt-5 flex justify-end gap-2">{footer}</div>}
+                {resolvedFooter && (
+                  <div className="mt-5 flex justify-end gap-2">{resolvedFooter}</div>
+                )}
               </HDialog.Panel>
             </TransitionChild>
           </div>

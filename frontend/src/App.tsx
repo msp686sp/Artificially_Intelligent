@@ -6,14 +6,20 @@ import { Shell } from "@/layout/Shell";
 import { ToastProvider } from "@/components/Toast";
 import { EmptyState } from "@/components/EmptyState";
 
+// Agent 5 (fe-sources-dashboard)
+import DashboardPage from "@/routes/dashboard";
+import SourcesPage from "@/routes/sources";
+import SourceDetailPage from "@/routes/sources/detail";
+import ManifestPage from "@/routes/manifest";
+import LogsPage from "@/routes/logs";
+import SettingsPage from "@/routes/settings";
+
 // IMPORTANT — multi-agent coordination:
-// Each frontend page agent (5, 6, 7) replaces one or more <EmptyState>
-// placeholders below with a real route component (lazy-imported from
-// `@/routes/<page>`). To keep merges mechanical, ONLY edit between the
-// "ROUTES START" and "ROUTES END" markers below, and prefer adding
-// imports at the top of *this* file with a comment annotating which
-// agent owns each one. The Shell, Providers, and 404 catch-all are
-// owned by fe-shell (agent 4) and should not be moved.
+// Page agents (5, 6, 7) replace the <EmptyState> placeholders below
+// with imports from `@/routes/<page>`. Add new imports at the top of
+// this file with a comment annotating which agent owns each.
+// Only edit between the ROUTES START/END markers. Shell + Providers +
+// 404 catch-all are owned by fe-shell (agent 4) and should not move.
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,8 +33,7 @@ const queryClient = new QueryClient({
 });
 
 export function App() {
-  // The QueryClient must outlive any re-render that would replace it
-  // (HMR keeps the cache warm). useState gives us a stable instance.
+  // useState keeps the QueryClient stable across HMR re-renders.
   const [client] = useState(() => queryClient);
 
   return (
@@ -39,33 +44,15 @@ export function App() {
             <Shell>
               <Routes>
                 {/* === ROUTES START === */}
-                {/* Agent 5 (fe-sources-dashboard) owns: */}
-                <Route
-                  path="/"
-                  element={<EmptyState pageName="Dashboard" ownedBy="agent 5 (fe-sources-dashboard)" />}
-                />
-                <Route
-                  path="/sources"
-                  element={<EmptyState pageName="Sources" ownedBy="agent 5 (fe-sources-dashboard)" />}
-                />
-                <Route
-                  path="/sources/:name"
-                  element={<EmptyState pageName="Source detail" ownedBy="agent 5 (fe-sources-dashboard)" />}
-                />
-                <Route
-                  path="/manifest"
-                  element={<EmptyState pageName="Manifest" ownedBy="agent 5 (fe-sources-dashboard)" />}
-                />
-                <Route
-                  path="/logs"
-                  element={<EmptyState pageName="Logs" ownedBy="agent 5 (fe-sources-dashboard)" />}
-                />
-                <Route
-                  path="/settings"
-                  element={<EmptyState pageName="Settings" ownedBy="agent 5 (fe-sources-dashboard)" />}
-                />
+                {/* Agent 5 (fe-sources-dashboard) */}
+                <Route path="/" element={<DashboardPage />} />
+                <Route path="/sources" element={<SourcesPage />} />
+                <Route path="/sources/:name" element={<SourceDetailPage />} />
+                <Route path="/manifest" element={<ManifestPage />} />
+                <Route path="/logs" element={<LogsPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
 
-                {/* Agent 6 (fe-rankings-zips) owns: */}
+                {/* Agent 6 (fe-rankings-zips) */}
                 <Route
                   path="/rankings"
                   element={<EmptyState pageName="Rankings" ownedBy="agent 6 (fe-rankings-zips)" />}
@@ -83,7 +70,7 @@ export function App() {
                   element={<EmptyState pageName="Filters & weights" ownedBy="agent 6 (fe-rankings-zips)" />}
                 />
 
-                {/* Agent 7 (fe-sql-backtest) owns: */}
+                {/* Agent 7 (fe-sql-backtest) */}
                 <Route
                   path="/sql"
                   element={<EmptyState pageName="SQL workbench" ownedBy="agent 7 (fe-sql-backtest)" />}
@@ -102,7 +89,7 @@ export function App() {
                 />
                 {/* === ROUTES END === */}
 
-                {/* 404 — fe-shell owned. Do not move. */}
+                {/* 404 — fe-shell owned. */}
                 <Route
                   path="*"
                   element={

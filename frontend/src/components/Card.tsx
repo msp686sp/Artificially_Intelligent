@@ -1,11 +1,19 @@
 import { forwardRef, type HTMLAttributes, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
-interface CardProps extends HTMLAttributes<HTMLDivElement> {
+interface CardProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
   /** Tighter padding for dense dashboards. */
   dense?: boolean;
   /** Removes the inner padding so the caller controls spacing (e.g. for tables). */
   flush?: boolean;
+  /** Convenience: render a CardHeader at the top of the card. */
+  title?: ReactNode;
+  /** Header description (only used when `title` is also set). */
+  description?: ReactNode;
+  /** Header action element (only used when `title` is also set). */
+  action?: ReactNode;
+  /** Back-compat alias for ``action``. */
+  actions?: ReactNode;
 }
 
 /**
@@ -14,9 +22,10 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
  * sits inside one.
  */
 export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
-  { className, dense, flush, children, ...rest },
+  { className, dense, flush, children, title, description, action, actions, ...rest },
   ref,
 ) {
+  const headerAction = action ?? actions;
   return (
     <div
       ref={ref}
@@ -27,6 +36,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
       )}
       {...rest}
     >
+      {title && <CardHeader title={title} description={description} action={headerAction} />}
       {children}
     </div>
   );

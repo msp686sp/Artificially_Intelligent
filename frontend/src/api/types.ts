@@ -63,6 +63,15 @@ export interface RefreshJobResponse {
   job_id: string;
 }
 
+/** Server-Sent / WebSocket event from /api/events for a refresh job. */
+export interface RefreshJobEvent {
+  type: string;
+  job_id: string;
+  payload?: Record<string, unknown>;
+  ts?: number;
+  timestamp?: string;
+}
+
 // =====================================================================
 // SQL + schema
 // =====================================================================
