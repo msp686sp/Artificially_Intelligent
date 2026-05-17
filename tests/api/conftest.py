@@ -1,59 +1,125 @@
 """Shared fixtures for API tests.
 
-Provides:
-- ``warehouse_path`` — tmp DuckDB warehouse, schema initialized + ZHVI
-  fixture loaded so source-detail / preview / schema tests have data.
-- ``client`` — synchronous ``starlette.testclient.TestClient`` bound to
-  the test warehouse via the ``RENTAL_WAREHOUSE_PATH`` env var.
+Combines agent-1's source-detail-friendly seeding with agent-2's
+seeded-vs-empty client split. Provides:
 
-The ``RENTAL_MANIFEST_PATH`` env-isolation is inherited from the
-repo-root ``tests/conftest.py``.
+- ``warehouse``        — tmp DuckDB warehouse, schema + composite views
+                         initialized, ZHVI + ZORI + Redfin fixtures loaded
+                         (matches agent-1's ``warehouse_path`` + agent-2's
+                         ``warehouse``)
+- ``warehouse_path``   — alias of ``warehouse`` for older tests
+- ``empty_warehouse``  — initialized but unseeded, for "degrades to empty"
+                         tests
+- ``client``           — TestClient bound to the seeded warehouse
+- ``empty_client``     — TestClient bound to the empty warehouse
+- ``app`` / ``empty_app`` — the FastAPI app instances behind those clients
+
+``RENTAL_MANIFEST_PATH`` env-isolation is inherited from
+``tests/conftest.py``. We reset the cached Settings between tests so
+env-var changes propagate.
 """
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from pathlib import Path
 
+import duckdb
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from rental.db import connect, init_schema
-from rental.sources import ZillowZHVISource
+from rental.db import init_schema
+from rental.scoring import init_composite_views
+from rental.sources import RedfinMarketSource, ZillowZHVISource
+from rental.sources.zori import ZillowZORISource
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-ZHVI_FIXTURE = REPO_ROOT / "tests" / "fixtures" / "zhvi_sample.csv"
+FIXTURES_DIR = REPO_ROOT / "tests" / "fixtures"
+
+
+def _reset_settings_cache() -> None:
+    """Drop the Settings singleton so env-var changes are visible."""
+    from api import deps as api_deps
+
+    api_deps._settings = None  # type: ignore[attr-defined]
+
+
+def _make_app() -> FastAPI:
+    """Build a FastAPI app with the full registered route set."""
+    _reset_settings_cache()
+    from api.main import create_app
+
+    return create_app()
 
 
 @pytest.fixture
-def warehouse_path(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """A fresh DuckDB warehouse seeded with the bundled ZHVI fixture."""
+def warehouse(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """A fresh DuckDB warehouse seeded with the canonical fixture trio.
+
+    Uses ``Source.refresh(..., from_fixture=)`` so the manifest is
+    populated as a side-effect — agent-1's manifest tests rely on real
+    manifest entries existing for the seeded sources.
+    """
     target = tmp_path / "warehouse.duckdb"
     monkeypatch.setenv("RENTAL_WAREHOUSE_PATH", str(target))
 
-    con = connect(target)
+    con = duckdb.connect(str(target))
     try:
         init_schema(con)
-        # Seed one source so /sources/{name}/preview has rows to return.
-        ZillowZHVISource().refresh(con, tmp_path / "raw", from_fixture=ZHVI_FIXTURE)
+        init_composite_views(con)
+        raw_dir = tmp_path / "raw"
+        ZillowZHVISource().refresh(
+            con, raw_dir, from_fixture=FIXTURES_DIR / "zhvi_sample.csv"
+        )
+        ZillowZORISource().refresh(
+            con, raw_dir, from_fixture=FIXTURES_DIR / "zori_sample.csv"
+        )
+        RedfinMarketSource().refresh(
+            con, raw_dir, from_fixture=FIXTURES_DIR / "redfin_market_sample.tsv"
+        )
+    finally:
+        con.close()
+    return target
+
+
+# Back-compat alias for tests that named the fixture warehouse_path.
+@pytest.fixture
+def warehouse_path(warehouse: Path) -> Path:
+    return warehouse
+
+
+@pytest.fixture
+def empty_warehouse(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Schema-only warehouse used to verify graceful empty-state behaviour."""
+    target = tmp_path / "warehouse.duckdb"
+    monkeypatch.setenv("RENTAL_WAREHOUSE_PATH", str(target))
+    con = duckdb.connect(str(target))
+    try:
+        init_schema(con)
+        init_composite_views(con)
     finally:
         con.close()
     return target
 
 
 @pytest.fixture
-def client(warehouse_path: Path) -> TestClient:
-    """TestClient against a freshly built app bound to the test warehouse.
+def app(warehouse: Path) -> FastAPI:  # noqa: ARG001 — env var set by warehouse
+    return _make_app()
 
-    We rebuild the app per-test (via ``create_app``) so the cached
-    settings + DuckDB connections always see the test env vars.
-    """
-    # Reset the module-level Settings singleton so the new env vars stick.
-    from api import deps as api_deps
 
-    api_deps._settings = None  # type: ignore[attr-defined]
+@pytest.fixture
+def empty_app(empty_warehouse: Path) -> FastAPI:  # noqa: ARG001
+    return _make_app()
 
-    from api.main import create_app
 
-    app = create_app()
+@pytest.fixture
+def client(app: FastAPI) -> Iterator[TestClient]:
     with TestClient(app) as c:
+        yield c
+
+
+@pytest.fixture
+def empty_client(empty_app: FastAPI) -> Iterator[TestClient]:
+    with TestClient(empty_app) as c:
         yield c

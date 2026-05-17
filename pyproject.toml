@@ -60,8 +60,25 @@ target-version = "py311"
 [tool.ruff.lint]
 select = ["E", "F", "I", "W", "UP", "B"]
 
-# B008 (function-call-in-default) trips on FastAPI's idiomatic
-# ``Depends(...)`` / ``Body(...)`` defaults. Allowed in route modules.
+# FastAPI's idiomatic ``Depends(...)`` / ``Query(...)`` / ``Body(...)``
+# defaults trip ruff's B008 ("function call in default argument") even
+# though they are part of FastAPI's documented contract for declaring
+# dependencies. Whitelist them so the lint stays useful for real bugs.
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = [
+    "fastapi.Body",
+    "fastapi.Depends",
+    "fastapi.Query",
+    "fastapi.Path",
+    "fastapi.Header",
+    "fastapi.Cookie",
+    "fastapi.Form",
+    "fastapi.File",
+    "fastapi.Security",
+]
+
+# Belt + suspenders: keep the per-file ignore so any new B008 patterns
+# in route modules don't break CI before the immutable-calls list grows.
 [tool.ruff.lint.per-file-ignores]
 "api/routes/*.py" = ["B008"]
 

@@ -2,27 +2,29 @@
 
 Each route module exports a top-level ``router: fastapi.APIRouter`` and is
 imported below in a labeled block owned by a single agent. ``main.py``
-calls ``include_all`` to attach every router to the app.
-
-Conflict pattern: adding/removing a route module is a single-line edit
-inside the owning agent's block.
+calls ``include_all`` to attach every router to the app under ``/api``.
 """
 
 from __future__ import annotations
 
 from fastapi import APIRouter, FastAPI
 
+# Agent 2 — sql / rankings / zips / charts
+from api.routes import charts as _charts
+
 # Agent 1 — core
 from api.routes import health as _health
 from api.routes import manifest as _manifest
+from api.routes import rankings as _rankings
 from api.routes import schema as _schema
 from api.routes import sources as _sources
+from api.routes import sql as _sql
+from api.routes import zips as _zips
 
-# Agent 2 — sql / rankings / zips / charts
-#   (each module exports ``router``; add imports here)
-
-# Agent 3 — config / backtest / events (WebSocket)
-#   (each module exports ``router``; add imports here)
+# Agent 3 — config / backtest / events  (added after merge)
+# from api.routes import backtest as _backtest
+# from api.routes import config as _config
+# from api.routes import events as _events
 
 
 _ROUTERS: list[APIRouter] = [
@@ -32,7 +34,11 @@ _ROUTERS: list[APIRouter] = [
     _manifest.router,
     _schema.router,
     # Agent 2 — sql / rankings / zips / charts
-    # Agent 3 — config / backtest / events
+    _sql.router,
+    _rankings.router,
+    _zips.router,
+    _charts.router,
+    # Agent 3 — config / backtest / events  (added after merge)
 ]
 
 
@@ -42,4 +48,8 @@ def include_all(app: FastAPI) -> None:
         app.include_router(router, prefix="/api")
 
 
-__all__ = ["include_all"]
+# Back-compat alias for code expecting ``register_routes``.
+register_routes = include_all
+
+
+__all__ = ["include_all", "register_routes"]

@@ -1,9 +1,13 @@
-"""Shared FastAPI dependencies — settings + DuckDB connection factory.
+"""Shared FastAPI dependencies — settings + DuckDB connection factories.
 
-The connection factory is intentionally per-request: DuckDB connections
-are cheap to open and we want zero shared mutable state across requests.
-Refresh endpoints need write access; read endpoints prefer ``read_only=True``
-but transparently fall back when the warehouse file does not yet exist.
+Connections are per-request (cheap to open, no shared mutable state).
+Three flavors are exported:
+
+- ``get_db_ro``    — read-only handle, used by query endpoints
+- ``get_db_rw``    — writable handle, used by refresh endpoints
+- ``get_con``      — writable handle that ALSO bootstraps the schema and
+                     composite views (used by SQL/rankings/zips routes
+                     so they're self-healing on a fresh warehouse)
 """
 
 from __future__ import annotations
@@ -16,6 +20,8 @@ import duckdb
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from rental import config as rental_config
+from rental.db import init_schema
+from rental.scoring import init_composite_views
 
 
 class Settings(BaseSettings):
@@ -67,8 +73,7 @@ def _open_connection(*, read_only: bool) -> duckdb.DuckDBPyConnection:
 
     Falls back to a writable connection if read-only open fails (e.g. the
     warehouse file does not exist yet — DuckDB cannot create files in
-    ``read_only`` mode). Callers expecting a read-only handle should
-    still treat writes as undefined behavior.
+    ``read_only`` mode).
     """
     target = get_settings().warehouse_path
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -76,7 +81,6 @@ def _open_connection(*, read_only: bool) -> duckdb.DuckDBPyConnection:
         try:
             return duckdb.connect(str(target), read_only=True)
         except duckdb.Error:
-            # E.g. another writer has the database open in writable mode.
             pass
     return duckdb.connect(str(target))
 
@@ -91,13 +95,24 @@ def get_db_ro() -> Iterator[duckdb.DuckDBPyConnection]:
 
 
 def get_db_rw() -> Iterator[duckdb.DuckDBPyConnection]:
-    """Yield a writable DuckDB connection scoped to a single request.
+    """Yield a writable DuckDB connection scoped to a single request."""
+    con = _open_connection(read_only=False)
+    try:
+        yield con
+    finally:
+        con.close()
 
-    Used by refresh endpoints (initial init/log writes) before the
-    background task takes over with its own short-lived connection.
+
+def get_con() -> Iterator[duckdb.DuckDBPyConnection]:
+    """Yield a writable connection with schema + composite views applied.
+
+    Used by SQL / rankings / zips / charts routes so they work against
+    a fresh warehouse without a separate setup step.
     """
     con = _open_connection(read_only=False)
     try:
+        init_schema(con)
+        init_composite_views(con)
         yield con
     finally:
         con.close()
