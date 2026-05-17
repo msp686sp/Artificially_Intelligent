@@ -74,7 +74,7 @@ export default function SourcesPage() {
   };
 
   return (
-    <div className="stack" style={{ gap: "1.5rem" }}>
+    <div className="stack" data-testid="sources-root" style={{ gap: "1.5rem" }}>
       <header className="row">
         <h1 style={{ margin: 0 }}>Sources</h1>
         <div className="spacer" />
@@ -93,7 +93,7 @@ export default function SourcesPage() {
         <div className="empty-state">No sources registered.</div>
       )}
 
-      <div className="grid source-cards">
+      <div className="grid source-cards" data-testid="sources-grid">
         {(sources.data ?? []).map((s) => {
           const meta = mergeSourceMeta(s.name, {
             license: s.license ?? undefined,
@@ -104,13 +104,18 @@ export default function SourcesPage() {
           return (
             <Card
               key={s.name}
+              data-testid={`sources-card-${s.name}`}
               title={
                 <span>
                   <Link to={`/sources/${s.name}`}>{meta.display_name}</Link>{" "}
                   <span className="muted mono">({s.name})</span>
                 </span>
               }
-              actions={<Badge status={s.status}>{s.status}</Badge>}
+              actions={
+                <span data-testid={`sources-card-${s.name}-status`}>
+                  <Badge status={s.status}>{s.status}</Badge>
+                </span>
+              }
             >
               <div className="stack">
                 <div className="muted">{meta.description}</div>
@@ -156,6 +161,7 @@ export default function SourcesPage() {
                     onClick={() => startRefresh(s, false)}
                     disabled={isActive}
                     aria-label={`Refresh ${s.name}`}
+                    data-testid={`sources-card-${s.name}-refresh-btn`}
                   >
                     Refresh
                   </button>
@@ -163,12 +169,14 @@ export default function SourcesPage() {
                     onClick={() => startRefresh(s, true)}
                     disabled={isActive}
                     aria-label={`Refresh ${s.name} from fixture`}
+                    data-testid={`sources-card-${s.name}-fixture-btn`}
                   >
                     Refresh from fixture
                   </button>
                   <button
                     onClick={() => navigate(`/sources/${s.name}`)}
                     aria-label={`Preview ${s.name} rows`}
+                    data-testid={`sources-card-${s.name}-preview-btn`}
                   >
                     Preview rows
                   </button>
@@ -179,6 +187,7 @@ export default function SourcesPage() {
                       )
                     }
                     aria-label={`Open ${s.name} in SQL`}
+                    data-testid={`sources-card-${s.name}-sql-btn`}
                   >
                     Open in SQL
                   </button>
