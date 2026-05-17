@@ -76,26 +76,54 @@ export default function RankingsIndex() {
           />
         ),
         cell: ({ row }) => (
-          <input
-            type="checkbox"
-            aria-label={`Select ${row.original.zcta5}`}
-            className="h-4 w-4"
-            checked={row.getIsSelected()}
-            onClick={(e) => e.stopPropagation()}
-            onChange={row.getToggleSelectedHandler()}
-          />
+          <span
+            data-testid={`rankings-row-${row.original.zcta5}`}
+            className="inline-flex items-center"
+          >
+            <input
+              type="checkbox"
+              aria-label={`Select ${row.original.zcta5}`}
+              data-testid={`rankings-checkbox-${row.original.zcta5}`}
+              className="h-4 w-4"
+              checked={row.getIsSelected()}
+              onClick={(e) => e.stopPropagation()}
+              onChange={row.getToggleSelectedHandler()}
+            />
+          </span>
         ),
       }),
       helper.accessor("zcta5", {
-        header: "ZIP",
+        header: () => (
+          <span data-testid="rankings-col-zcta5">
+            <span data-testid="rankings-sort-zcta5">ZIP</span>
+          </span>
+        ),
         cell: (info) => (
           <span className="font-mono font-semibold text-accent">{info.getValue()}</span>
         ),
       }),
-      helper.accessor("state", { header: "State", cell: (info) => info.getValue() ?? "—" }),
-      helper.accessor("metro", { header: "Metro", cell: (info) => info.getValue() ?? "—" }),
+      helper.accessor("state", {
+        header: () => (
+          <span data-testid="rankings-col-state">
+            <span data-testid="rankings-sort-state">State</span>
+          </span>
+        ),
+        cell: (info) => info.getValue() ?? "—",
+      }),
+      helper.accessor("metro", {
+        header: () => (
+          <span data-testid="rankings-col-metro">
+            <span data-testid="rankings-sort-metro">Metro</span>
+          </span>
+        ),
+        cell: (info) => info.getValue() ?? "—",
+      }),
       helper.accessor("market_score", {
-        header: "MarketScore",
+        header: () => (
+          <span data-testid="rankings-col-market_score">
+            <span data-testid="rankings-sort-market_score">MarketScore</span>
+          </span>
+        ),
         cell: (info) => (
           <span className={cx("font-semibold", scoreColorClass(info.getValue()))}>
             {formatNumber(info.getValue(), { decimals: 1 })}
@@ -103,27 +131,51 @@ export default function RankingsIndex() {
         ),
       }),
       helper.accessor("yield_score", {
-        header: "Yield",
+        header: () => (
+          <span data-testid="rankings-col-yield_score">
+            <span data-testid="rankings-sort-yield_score">Yield</span>
+          </span>
+        ),
         cell: (info) => formatNumber(info.getValue(), { decimals: 1 }),
       }),
       helper.accessor("growth_score", {
-        header: "Growth",
+        header: () => (
+          <span data-testid="rankings-col-growth_score">
+            <span data-testid="rankings-sort-growth_score">Growth</span>
+          </span>
+        ),
         cell: (info) => formatNumber(info.getValue(), { decimals: 1 }),
       }),
       helper.accessor("stability_score", {
-        header: "Stability",
+        header: () => (
+          <span data-testid="rankings-col-stability_score">
+            <span data-testid="rankings-sort-stability_score">Stability</span>
+          </span>
+        ),
         cell: (info) => formatNumber(info.getValue(), { decimals: 1 }),
       }),
       helper.accessor("affordability_score", {
-        header: "Afford.",
+        header: () => (
+          <span data-testid="rankings-col-affordability_score">
+            <span data-testid="rankings-sort-affordability_score">Afford.</span>
+          </span>
+        ),
         cell: (info) => formatNumber(info.getValue(), { decimals: 1 }),
       }),
       helper.accessor("risk_score", {
-        header: "Risk",
+        header: () => (
+          <span data-testid="rankings-col-risk_score">
+            <span data-testid="rankings-sort-risk_score">Risk</span>
+          </span>
+        ),
         cell: (info) => formatNumber(info.getValue(), { decimals: 1 }),
       }),
       helper.accessor("gross_yield_monthly_pct", {
-        header: "Yield %",
+        header: () => (
+          <span data-testid="rankings-col-gross_yield_monthly_pct">
+            <span data-testid="rankings-sort-gross_yield_monthly_pct">Yield %</span>
+          </span>
+        ),
         cell: (info) => formatNumber(info.getValue(), { decimals: 2, suffix: "%" }),
       }),
     ],
@@ -187,7 +239,7 @@ export default function RankingsIndex() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="rankings-root">
       <header className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
           <h1 className="text-2xl font-semibold">MarketScore rankings</h1>
@@ -199,11 +251,16 @@ export default function RankingsIndex() {
             size="sm"
             onClick={goToCompare}
             disabled={selectedZips.length < 2}
-            data-testid="compare-selected"
+            data-testid="rankings-compare-btn"
           >
             Compare selected ({selectedZips.length})
           </Button>
-          <Button variant="secondary" size="sm" onClick={exportCsv}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={exportCsv}
+            data-testid="rankings-export-csv-btn"
+          >
             Export CSV
           </Button>
         </div>
@@ -218,6 +275,7 @@ export default function RankingsIndex() {
               maxLength={2}
               placeholder="e.g. NY"
               value={stateFilter}
+              data-testid="rankings-filter-state"
               onChange={(e) => {
                 setStateFilter(e.target.value.toUpperCase());
                 setPage(0);
@@ -247,6 +305,7 @@ export default function RankingsIndex() {
               min={0}
               max={100}
               value={minScore}
+              data-testid="rankings-filter-min-score"
               onChange={(e) => {
                 const v = Number(e.target.value);
                 setMinScore(v);
@@ -302,6 +361,23 @@ export default function RankingsIndex() {
             >
               Compact
             </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              data-testid="rankings-filter-apply-btn"
+              onClick={() => {
+                setPage(0);
+                syncUrl({
+                  state: stateFilter || undefined,
+                  metro: metroFilter || undefined,
+                  min_score: minScore > 0 ? minScore : undefined,
+                  max_score: maxScore < 100 ? maxScore : undefined,
+                  page: 0,
+                });
+              }}
+            >
+              Apply
+            </Button>
           </div>
         </div>
       </Card>
@@ -309,8 +385,13 @@ export default function RankingsIndex() {
       {data.length > 0 ? (
         <Card padded={false}>
           <DataTable
+            data={data}
+            columns={columns}
             table={table}
             density={density}
+            toolbar={false}
+            pageSize={0}
+            data-testid="rankings-table"
             onRowClick={(r: RankingRow) => navigate(`/rankings/${r.zcta5}`)}
           />
         </Card>
@@ -333,6 +414,7 @@ export default function RankingsIndex() {
           <Button
             size="sm"
             variant="secondary"
+            data-testid="rankings-pagination-prev"
             disabled={page === 0}
             onClick={() => {
               const p = Math.max(0, page - 1);
@@ -345,6 +427,7 @@ export default function RankingsIndex() {
           <Button
             size="sm"
             variant="secondary"
+            data-testid="rankings-pagination-next"
             disabled={(page + 1) * PAGE_SIZE >= total}
             onClick={() => {
               const p = page + 1;
