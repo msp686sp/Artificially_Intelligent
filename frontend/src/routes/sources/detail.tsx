@@ -75,7 +75,7 @@ export default function SourceDetailPage() {
   const everRefreshed = Boolean(source.data?.last_refresh);
 
   return (
-    <div className="stack" style={{ gap: "1.5rem" }}>
+    <div className="stack" data-testid="source-detail-root" style={{ gap: "1.5rem" }}>
       <header className="row">
         <Link to="/sources">← Sources</Link>
         <h1 style={{ margin: 0 }}>{meta.display_name}</h1>
@@ -87,7 +87,9 @@ export default function SourceDetailPage() {
           Refresh
         </button>
         <button onClick={() => runRefresh(true)}>Refresh from fixture</button>
-        <button onClick={copyCli}>{copied ? "Copied!" : "Copy CLI command"}</button>
+        <button onClick={copyCli} data-testid="source-detail-cli-copy">
+          {copied ? "Copied!" : "Copy CLI command"}
+        </button>
       </header>
 
       {refreshJob.state === "running" && (
@@ -145,6 +147,7 @@ export default function SourceDetailPage() {
           <div className="empty-state">No columns reported.</div>
         ) : (
           <DataTable<SchemaColumn>
+            data-testid="source-detail-schema-table"
             columns={[
               { key: "name", header: "Column", accessor: (r) => r.name, sortable: true },
               { key: "type", header: "Type", accessor: (r) => r.type, sortable: true },
@@ -180,6 +183,7 @@ export default function SourceDetailPage() {
         ) : (
           <div>
             <DataTable
+              data-testid="source-detail-sample-table"
               columns={(preview.data?.columns ?? []).map((c) => ({
                 key: c,
                 header: c,
@@ -220,7 +224,7 @@ export default function SourceDetailPage() {
         )}
       </Card>
 
-      <Card title="Refresh history">
+      <Card title="Refresh history" data-testid="source-detail-history">
         {manifest.isLoading ? (
           <div className="muted">Loading…</div>
         ) : manifest.isError ? (
