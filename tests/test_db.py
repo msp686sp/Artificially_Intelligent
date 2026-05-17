@@ -11,5 +11,8 @@ def test_schema_is_idempotent():
     expected = {
         "geo_zcta", "geo_county", "geo_cbsa", "geo_zcta_county_xwalk",
         "raw_zillow_zhvi", "refresh_log",
+        # Phase 4 (operability + risk)
+        "raw_county_tax_rate", "ref_state_insurance",
+        "raw_eviction_lab", "raw_fema_nri",
     }
     assert expected <= tables
