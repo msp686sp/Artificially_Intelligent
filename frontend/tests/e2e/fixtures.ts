@@ -17,6 +17,9 @@
 import { test as base, expect, Page } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // 2026-05-17T12:00:00Z — frozen "now" for deterministic relative dates.
 const FROZEN_NOW = Date.UTC(2026, 4, 17, 12, 0, 0);
