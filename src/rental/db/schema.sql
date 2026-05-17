@@ -69,6 +69,62 @@ CREATE TABLE IF NOT EXISTS raw_redfin_market (
 );
 
 -- ============================================================
+-- Phase 2 (Demand half) — BLS QCEW county-level employment & wages.
+-- Source: https://data.bls.gov/cew/data/files/{year}/csv/{year}_annual_singlefile.zip
+-- License: U.S. Government work, public domain. Cadence: annual files land
+-- ~May; quarterly files land ~6 months after the quarter close.
+-- We filter to county-grain rows (area_fips length 5) at load time, dropping
+-- nation/state/MSA aggregates.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS raw_bls_qcew (
+    area_fips      VARCHAR,
+    year           INTEGER,
+    quarter        INTEGER,    -- 1..4 for quarterly, 0 for annual avg
+    industry_code  VARCHAR,    -- NAICS code (e.g. '10' total, '62' health care)
+    own_code       INTEGER,    -- ownership (0=total covered, 5=private, etc.)
+    employment     BIGINT,     -- avg monthly employment for the period
+    total_wages    BIGINT,     -- total wages, whole dollars
+    snapshot_date  DATE,
+    PRIMARY KEY (area_fips, year, quarter, industry_code, own_code, snapshot_date)
+);
+
+-- ============================================================
+-- Phase 2 (Demand half) — IRS SOI county-to-county migration.
+-- Source: https://www.irs.gov/statistics/soi-tax-stats-migration-data
+-- Files like countyinflow1920.csv / countyoutflow1920.csv (TY2019 → TY2020).
+-- License: U.S. Government work, public domain. Cadence: annual, ~2yr lag.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS raw_irs_migration (
+    year             INTEGER,    -- end-year of the migration (1920 file → 2020)
+    flow_direction   VARCHAR,    -- 'inflow' or 'outflow'
+    origin_fips      VARCHAR,    -- 5-char county FIPS (or special aggregate)
+    dest_fips        VARCHAR,    -- 5-char county FIPS (or special aggregate)
+    returns          BIGINT,     -- number of tax returns
+    exemptions       BIGINT,     -- number of personal exemptions (~people)
+    agi              BIGINT,     -- aggregate adjusted gross income, thousands $
+    snapshot_date    DATE,
+    PRIMARY KEY (year, flow_direction, origin_fips, dest_fips, snapshot_date)
+);
+
+-- ============================================================
+-- Phase 2 (Demand half) — ACS 5-year demographics, ZCTA-grain.
+-- Source: https://api.census.gov/data/{year}/acs/acs5
+--   ?get=B01003_001E,B19013_001E,B01002_001E&for=zip+code+tabulation+area:*
+-- License: U.S. Government work, public domain. Cadence: annual, December.
+-- B19013_001E uses -666666666 as the Census "not available" sentinel; we
+-- coerce those to NULL at load time.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS raw_acs_demographics (
+    zcta5                   VARCHAR,
+    year                    INTEGER,   -- ACS 5yr endyear
+    population              BIGINT,    -- B01003_001E
+    median_household_income BIGINT,    -- B19013_001E (whole dollars)
+    median_age              DOUBLE,    -- B01002_001E
+    snapshot_date           DATE,
+    PRIMARY KEY (zcta5, year, snapshot_date)
+);
+
+-- ============================================================
 -- Refresh audit.
 -- ============================================================
 CREATE TABLE IF NOT EXISTS refresh_log (

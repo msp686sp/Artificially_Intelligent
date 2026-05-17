@@ -13,10 +13,12 @@ yield_score:
   effective_tax_rate: 0.30        # neg z (higher tax = lower score)
   insurance_rate: 0.20            # neg z (higher premium = lower score)
 
-# DemandScore, SupplyScore, OperabilityScore, RiskScore land in their
-# respective phases. Stubbed here for forward visibility.
-
-demand_score: {}
+# Phase 2 (Demand half): wage-weighted job growth + migration + income growth.
+# Within-state robust z-scores (median + MAD), weighted sum.
+demand_score:
+  wage_weighted_job_cagr: 0.40
+  net_migration_per_1000: 0.35
+  hh_income_growth: 0.25
 
 # SupplyScore consumes Redfin-derived features (no Redfin-specific subscore).
 # Weights are stubbed; final values land in Phase 3 alongside permits + vacancy.
