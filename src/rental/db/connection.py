@@ -4,13 +4,15 @@ from pathlib import Path
 
 import duckdb
 
-from rental.config import WAREHOUSE_PATH
+from rental import config
 
 SCHEMA_PATH = Path(__file__).parent / "schema.sql"
 
 
 def connect(path: Path | None = None) -> duckdb.DuckDBPyConnection:
-    target = path or WAREHOUSE_PATH
+    # Re-resolve at call time so RENTAL_WAREHOUSE_PATH env-var overrides set
+    # after module import (e.g. by tests) take effect.
+    target = path or config._resolve_warehouse_path()
     target.parent.mkdir(parents=True, exist_ok=True)
     return duckdb.connect(str(target))
 
