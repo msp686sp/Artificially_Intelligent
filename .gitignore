@@ -27,3 +27,6 @@ data/rankings/
 .DS_Store
 .vscode/
 .idea/
+
+# Claude Code agent worktrees (transient, per-session)
+.claude/
