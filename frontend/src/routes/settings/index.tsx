@@ -36,21 +36,21 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="stack" style={{ gap: "1.5rem" }}>
+    <div className="stack" style={{ gap: "1.5rem" }} data-testid="settings-root">
       <header className="row">
         <h1 style={{ margin: 0 }}>Settings</h1>
       </header>
 
       <Card title="Environment">
-        <dl className="kv-list">
+        <dl className="kv-list" data-testid="settings-env">
           <dt>RENTAL_WAREHOUSE_PATH</dt>
-          <dd className="mono">
+          <dd className="mono" data-testid="settings-warehouse-path">
             {health.data?.warehouse_path ?? (
               <span className="muted">unset / not reported</span>
             )}
           </dd>
           <dt>RENTAL_MANIFEST_PATH</dt>
-          <dd className="mono">
+          <dd className="mono" data-testid="settings-manifest-path">
             {health.data?.manifest_path ?? (
               <span className="muted">unset / not reported</span>
             )}
@@ -79,20 +79,22 @@ export default function SettingsPage() {
       </Card>
 
       <Card title="Version">
-        {version.isLoading ? (
-          <div className="muted">Loading…</div>
-        ) : version.isError ? (
-          <div className="muted">Version endpoint unavailable.</div>
-        ) : version.data ? (
-          <dl className="kv-list">
-            <dt>API</dt>
-            <dd className="mono">{version.data.api}</dd>
-            <dt>App</dt>
-            <dd className="mono">{version.data.app}</dd>
-            <dt>Python</dt>
-            <dd className="mono">{version.data.python}</dd>
-          </dl>
-        ) : null}
+        <div data-testid="settings-version">
+          {version.isLoading ? (
+            <div className="muted">Loading…</div>
+          ) : version.isError ? (
+            <div className="muted">Version endpoint unavailable.</div>
+          ) : version.data ? (
+            <dl className="kv-list">
+              <dt>API</dt>
+              <dd className="mono">{version.data.api}</dd>
+              <dt>App</dt>
+              <dd className="mono">{version.data.app}</dd>
+              <dt>Python</dt>
+              <dd className="mono">{version.data.python}</dd>
+            </dl>
+          ) : null}
+        </div>
       </Card>
 
       <Card title="Appearance">
@@ -100,7 +102,12 @@ export default function SettingsPage() {
           <legend className="muted" style={{ marginBottom: "0.5rem" }}>
             Theme (currently rendering: <strong>{resolved}</strong>)
           </legend>
-          <div className="row" role="radiogroup" aria-label="Theme">
+          <div
+            className="row"
+            role="radiogroup"
+            aria-label="Theme"
+            data-testid="settings-theme"
+          >
             {THEMES.map((t) => (
               <label
                 key={t.value}
@@ -149,6 +156,7 @@ export default function SettingsPage() {
               checked={mobileNav}
               onChange={(e) => toggleMobileNav(e.target.checked)}
               style={{ minHeight: 0 }}
+              data-testid="settings-mobile-nav-toggle"
             />
             Show bottom navigation on mobile
           </label>
