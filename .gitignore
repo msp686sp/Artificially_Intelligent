@@ -18,6 +18,7 @@ data/interim/
 data/warehouse.duckdb
 data/snapshots/
 data/rankings/
+data/backtest/
 
 # Secrets / env
 .env
