@@ -1,0 +1,22 @@
+# Composite MarketScore weights. Tuned against the Phase 6 backtest
+# (primary target: 5yr levered cash-on-cash + appreciation, combined).
+
+market_score:
+  yield: 0.25
+  demand: 0.30
+  supply: 0.20
+  operability: 0.20
+  risk: -0.05
+
+yield_score:
+  gross_yield: 0.50
+  effective_tax_rate: 0.30        # applied as -z
+  insurance_rate: 0.20            # applied as -z
+
+# DemandScore, SupplyScore, OperabilityScore, RiskScore land in their
+# respective phases. Stubbed here for forward visibility.
+
+demand_score: {}
+supply_score: {}
+operability_score: {}
+risk_score: {}

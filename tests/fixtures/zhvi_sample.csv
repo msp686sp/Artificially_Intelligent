@@ -1,0 +1,6 @@
+RegionID,SizeRank,RegionName,RegionType,StateName,State,Metro,CountyName,2023-12-31,2024-01-31,2024-02-29
+61639,1,10025,zip,New York,NY,"New York-Newark-Jersey City, NY-NJ-PA",New York County,1450000,1462000,1471500
+84654,2,60614,zip,Illinois,IL,"Chicago-Naperville-Elgin, IL-IN-WI",Cook County,612500,615200,618100
+91982,3,46220,zip,Indiana,IN,"Indianapolis-Carmel-Anderson, IN",Marion County,242000,243800,246100
+58196,4,38104,zip,Tennessee,TN,"Memphis, TN-MS-AR",Shelby County,178500,179200,180400
+73083,5,44102,zip,Ohio,OH,"Cleveland-Elyria, OH",Cuyahoga County,89200,90100,91500

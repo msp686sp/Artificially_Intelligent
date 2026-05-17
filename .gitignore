@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+.venv/
+venv/
+
+# Data warehouse + downloads (rebuildable from sources)
+data/raw/
+data/interim/
+data/warehouse.duckdb
+data/snapshots/
+data/rankings/
+
+# Secrets / env
+.env
+*.local
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
