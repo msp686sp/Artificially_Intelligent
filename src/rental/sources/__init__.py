@@ -1,19 +1,22 @@
 from rental.sources.base import RefreshResult, Source
-
-# Phase 1/3 (Redfin agent): zip-grain market tracker for DOM, sale-to-list,
-# inventory. Consumed by SupplyScore and OperabilityScore features.
+from rental.sources.census_geo import CensusGeoSource
 from rental.sources.redfin import RedfinMarketSource
 from rental.sources.zillow_zhvi import ZillowZHVISource
+from rental.sources.zori import ZillowZORISource
 
 REGISTRY: dict[str, type[Source]] = {
     "zillow_zhvi": ZillowZHVISource,
+    "zillow_zori": ZillowZORISource,
+    "census_geo": CensusGeoSource,
     "redfin_market": RedfinMarketSource,
 }
 
 __all__ = [
     "REGISTRY",
+    "CensusGeoSource",
+    "RedfinMarketSource",
     "RefreshResult",
     "Source",
     "ZillowZHVISource",
-    "RedfinMarketSource",
+    "ZillowZORISource",
 ]

@@ -9,9 +9,9 @@ market_score:
   risk: -0.05
 
 yield_score:
-  gross_yield: 0.50
-  effective_tax_rate: 0.30        # applied as -z
-  insurance_rate: 0.20            # applied as -z
+  gross_yield: 0.50               # higher is better; positive z-score
+  effective_tax_rate: 0.30        # neg z (higher tax = lower score)
+  insurance_rate: 0.20            # neg z (higher premium = lower score)
 
 # DemandScore, SupplyScore, OperabilityScore, RiskScore land in their
 # respective phases. Stubbed here for forward visibility.
