@@ -1,0 +1,14 @@
+{
+  "status": "ok",
+  "version": "0.1.0",
+  "uptime_s": 12345,
+  "warehouse": {
+    "initialized": true,
+    "path": "/home/dev/data/warehouse.duckdb",
+    "tables": 12,
+    "zips": 33421
+  },
+  "sources_ok": 10,
+  "sources_stale": 1,
+  "sources_error": 1
+}

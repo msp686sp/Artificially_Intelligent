@@ -1,0 +1,53 @@
+[
+  {
+    "id": "run-1",
+    "started_at": "2026-05-10T12:00:00Z",
+    "finished_at": "2026-05-10T12:03:42Z",
+    "mode": "run",
+    "start_year": 2013,
+    "end_year": 2019,
+    "primary_metric": 0.41,
+    "ready": true,
+    "weights": {
+      "yield": 0.25,
+      "demand": 0.25,
+      "supply": 0.2,
+      "operability": 0.15,
+      "risk": 0.15
+    }
+  },
+  {
+    "id": "run-2",
+    "started_at": "2026-05-12T09:30:00Z",
+    "finished_at": "2026-05-12T09:34:21Z",
+    "mode": "tune",
+    "start_year": 2013,
+    "end_year": 2017,
+    "primary_metric": 0.47,
+    "ready": true,
+    "weights": {
+      "yield": 0.30,
+      "demand": 0.20,
+      "supply": 0.20,
+      "operability": 0.15,
+      "risk": 0.15
+    }
+  },
+  {
+    "id": "run-3",
+    "started_at": "2026-05-14T14:00:00Z",
+    "finished_at": "2026-05-14T14:04:18Z",
+    "mode": "run",
+    "start_year": 2015,
+    "end_year": 2021,
+    "primary_metric": 0.33,
+    "ready": false,
+    "weights": {
+      "yield": 0.20,
+      "demand": 0.30,
+      "supply": 0.20,
+      "operability": 0.15,
+      "risk": 0.15
+    }
+  }
+]

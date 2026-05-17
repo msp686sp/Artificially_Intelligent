@@ -1,0 +1,34 @@
+{
+  "zcta5": "10025",
+  "identity": {
+    "state": "NY",
+    "metro": "New York-Newark-Jersey City",
+    "county": "New York",
+    "city_primary": "New York",
+    "population": 99105
+  },
+  "scores": {
+    "market_score": 82.4,
+    "yield_score": 71.2,
+    "demand_score": 88.9,
+    "supply_score": 79.1,
+    "operability_score": 85.3,
+    "risk_score": 87.5
+  },
+  "features": [
+    { "name": "median_home_value", "value": 1124300, "z": 2.31, "unit": "$" },
+    { "name": "median_rent", "value": 4120, "z": 2.04, "unit": "$/mo" },
+    { "name": "gross_yield_monthly_pct", "value": 0.366, "z": -0.62, "unit": "%" },
+    { "name": "vacancy_rate", "value": 0.052, "z": -0.41, "unit": "%" },
+    { "name": "days_on_market", "value": 38, "z": -0.74, "unit": "days" },
+    { "name": "permits_per_1k", "value": 1.7, "z": -0.18, "unit": "/1k" },
+    { "name": "property_tax_rate", "value": 0.0084, "z": -0.92, "unit": "%" },
+    { "name": "insurance_annual", "value": 1650, "z": -0.55, "unit": "$" },
+    { "name": "eviction_rate", "value": 0.012, "z": -1.10, "unit": "%" },
+    { "name": "fema_risk", "value": 38.2, "z": -0.30, "unit": "" }
+  ],
+  "filters": {
+    "passes": ["min_population", "min_rent_to_value", "max_climate_risk"],
+    "fails": ["max_property_tax"]
+  }
+}

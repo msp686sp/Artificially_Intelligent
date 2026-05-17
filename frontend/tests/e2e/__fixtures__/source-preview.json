@@ -1,0 +1,19 @@
+{
+  "columns": [
+    { "name": "RegionID", "type": "BIGINT" },
+    { "name": "RegionName", "type": "VARCHAR" },
+    { "name": "StateName", "type": "VARCHAR" },
+    { "name": "date", "type": "DATE" },
+    { "name": "value", "type": "DOUBLE" }
+  ],
+  "rows": [
+    [61639, "10025", "NY", "2025-07-31", 1124300],
+    [61640, "10026", "NY", "2025-07-31", 982400],
+    [61641, "10027", "NY", "2025-07-31", 1041200],
+    [61642, "10028", "NY", "2025-07-31", 1452900],
+    [61643, "10029", "NY", "2025-07-31", 853700]
+  ],
+  "limit": 5,
+  "offset": 0,
+  "total": 245321
+}

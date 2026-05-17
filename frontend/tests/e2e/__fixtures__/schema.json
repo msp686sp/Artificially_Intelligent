@@ -1,0 +1,77 @@
+[
+  {
+    "kind": "table",
+    "name": "raw_zillow_zhvi",
+    "row_count": 245321,
+    "columns": [
+      { "name": "RegionID", "type": "BIGINT", "nullable": false },
+      { "name": "SizeRank", "type": "BIGINT", "nullable": false },
+      { "name": "RegionName", "type": "VARCHAR", "nullable": false },
+      { "name": "RegionType", "type": "VARCHAR", "nullable": false },
+      { "name": "StateName", "type": "VARCHAR", "nullable": true },
+      { "name": "date", "type": "DATE", "nullable": false },
+      { "name": "value", "type": "DOUBLE", "nullable": true }
+    ]
+  },
+  {
+    "kind": "table",
+    "name": "raw_zillow_zori",
+    "row_count": 198432,
+    "columns": [
+      { "name": "RegionID", "type": "BIGINT", "nullable": false },
+      { "name": "RegionName", "type": "VARCHAR", "nullable": false },
+      { "name": "date", "type": "DATE", "nullable": false },
+      { "name": "value", "type": "DOUBLE", "nullable": true }
+    ]
+  },
+  {
+    "kind": "table",
+    "name": "raw_redfin_market",
+    "row_count": 87213,
+    "columns": [
+      { "name": "region", "type": "VARCHAR", "nullable": false },
+      { "name": "period_begin", "type": "DATE", "nullable": false },
+      { "name": "median_dom", "type": "DOUBLE", "nullable": true },
+      { "name": "median_sale_to_list", "type": "DOUBLE", "nullable": true },
+      { "name": "inventory", "type": "DOUBLE", "nullable": true }
+    ]
+  },
+  {
+    "kind": "view",
+    "name": "zip_features",
+    "row_count": 33421,
+    "columns": [
+      { "name": "zcta5", "type": "VARCHAR", "nullable": false },
+      { "name": "median_home_value", "type": "DOUBLE", "nullable": true },
+      { "name": "median_rent", "type": "DOUBLE", "nullable": true },
+      { "name": "gross_yield_monthly_pct", "type": "DOUBLE", "nullable": true },
+      { "name": "permits_per_1k", "type": "DOUBLE", "nullable": true }
+    ]
+  },
+  {
+    "kind": "view",
+    "name": "zip_scores",
+    "row_count": 33421,
+    "columns": [
+      { "name": "zcta5", "type": "VARCHAR", "nullable": false },
+      { "name": "market_score", "type": "DOUBLE", "nullable": true },
+      { "name": "yield_score", "type": "DOUBLE", "nullable": true },
+      { "name": "demand_score", "type": "DOUBLE", "nullable": true },
+      { "name": "supply_score", "type": "DOUBLE", "nullable": true },
+      { "name": "operability_score", "type": "DOUBLE", "nullable": true },
+      { "name": "risk_score", "type": "DOUBLE", "nullable": true }
+    ]
+  },
+  {
+    "kind": "table",
+    "name": "manifest",
+    "row_count": 12,
+    "columns": [
+      { "name": "source", "type": "VARCHAR", "nullable": false },
+      { "name": "status", "type": "VARCHAR", "nullable": false },
+      { "name": "last_refresh", "type": "TIMESTAMP", "nullable": true },
+      { "name": "rows", "type": "BIGINT", "nullable": true },
+      { "name": "sha256", "type": "VARCHAR", "nullable": true }
+    ]
+  }
+]

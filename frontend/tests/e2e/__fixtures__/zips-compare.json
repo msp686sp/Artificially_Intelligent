@@ -1,0 +1,53 @@
+{
+  "zcta5s": ["10025", "46220"],
+  "zips": {
+    "10025": {
+      "zcta5": "10025",
+      "identity": {
+        "state": "NY",
+        "metro": "New York-Newark-Jersey City",
+        "county": "New York"
+      },
+      "scores": {
+        "market_score": 82.4,
+        "yield_score": 71.2,
+        "demand_score": 88.9,
+        "supply_score": 79.1,
+        "operability_score": 85.3,
+        "risk_score": 87.5
+      },
+      "median_home_value": 1124300,
+      "median_rent": 4120,
+      "gross_yield_monthly_pct": 0.366
+    },
+    "46220": {
+      "zcta5": "46220",
+      "identity": {
+        "state": "IN",
+        "metro": "Indianapolis-Carmel-Anderson",
+        "county": "Marion"
+      },
+      "scores": {
+        "market_score": 81.7,
+        "yield_score": 89.4,
+        "demand_score": 74.2,
+        "supply_score": 78.0,
+        "operability_score": 82.1,
+        "risk_score": 84.8
+      },
+      "median_home_value": 268400,
+      "median_rent": 1685,
+      "gross_yield_monthly_pct": 0.628
+    }
+  },
+  "diff": {
+    "baseline": "10025",
+    "deltas": [
+      { "field": "market_score", "values": [82.4, 81.7], "delta": -0.7 },
+      { "field": "yield_score", "values": [71.2, 89.4], "delta": 18.2 },
+      { "field": "demand_score", "values": [88.9, 74.2], "delta": -14.7 },
+      { "field": "median_home_value", "values": [1124300, 268400], "delta": -855900 },
+      { "field": "median_rent", "values": [4120, 1685], "delta": -2435 }
+    ]
+  }
+}

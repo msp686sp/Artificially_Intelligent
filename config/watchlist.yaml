@@ -1,0 +1,16 @@
+# Zips to track between monthly refreshes, and the metric-crossing
+# rules that should fire alerts (Phase 7). Empty in Phase 0.
+
+watchlist: []
+
+# Example shape:
+# watchlist:
+#   - zcta5: "46220"          # Indianapolis - Broad Ripple
+#     alerts:
+#       - metric: market_score
+#         type: rank_delta
+#         threshold: 50         # alert if percentile rank moves by >= 50
+#       - metric: vacancy_rate
+#         type: absolute
+#         comparator: lt
+#         value: 0.05

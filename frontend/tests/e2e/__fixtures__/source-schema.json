@@ -1,0 +1,13 @@
+{
+  "name": "raw_zillow_zhvi",
+  "columns": [
+    { "name": "RegionID", "type": "BIGINT", "nullable": false },
+    { "name": "SizeRank", "type": "BIGINT", "nullable": false },
+    { "name": "RegionName", "type": "VARCHAR", "nullable": false },
+    { "name": "RegionType", "type": "VARCHAR", "nullable": false },
+    { "name": "StateName", "type": "VARCHAR", "nullable": true },
+    { "name": "date", "type": "DATE", "nullable": false },
+    { "name": "value", "type": "DOUBLE", "nullable": true }
+  ],
+  "row_count": 245321
+}

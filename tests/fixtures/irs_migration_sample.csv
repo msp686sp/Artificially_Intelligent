@@ -1,0 +1,31 @@
+year,flow_direction,y1_statefips,y1_countyfips,y2_statefips,y2_countyfips,y1_state,y1_countyname,n1,n2,AGI
+2020,inflow,17,031,17,031,IL,Cook County Total Migration-US,38500,71200,2840000
+2020,inflow,18,097,17,031,IN,Marion County,1850,3700,150000
+2020,inflow,47,157,17,031,TN,Shelby County,420,890,32500
+2020,inflow,36,061,17,031,NY,New York County,1120,1980,210000
+2020,outflow,17,031,17,031,IL,Cook County Total Migration-US,52800,98400,3950000
+2020,outflow,17,031,18,097,IL,Cook County,2200,4600,170000
+2020,outflow,17,031,47,157,IL,Cook County,1050,2300,72000
+2020,outflow,17,031,36,061,IL,Cook County,1450,2550,290000
+2020,inflow,36,061,36,061,NY,New York County Total Migration-US,52000,82000,7100000
+2020,inflow,17,031,36,061,IL,Cook County,1100,1850,220000
+2020,inflow,39,035,36,061,OH,Cuyahoga County,180,310,16500
+2020,outflow,36,061,36,061,NY,New York County Total Migration-US,71000,118000,9600000
+2020,outflow,36,061,17,031,NY,New York County,1300,2100,240000
+2020,outflow,36,061,39,035,NY,New York County,90,160,7500
+2020,inflow,18,097,18,097,IN,Marion County Total Migration-US,12500,25000,720000
+2020,inflow,17,031,18,097,IL,Cook County,2100,4500,165000
+2020,inflow,47,157,18,097,TN,Shelby County,310,640,18000
+2020,outflow,18,097,18,097,IN,Marion County Total Migration-US,10800,21800,640000
+2020,outflow,18,097,17,031,IN,Marion County,1700,3400,135000
+2020,outflow,18,097,47,157,IN,Marion County,220,460,12500
+2020,inflow,47,157,47,157,TN,Shelby County Total Migration-US,18200,36800,1050000
+2020,inflow,17,031,47,157,IL,Cook County,920,2000,68000
+2020,inflow,18,097,47,157,IN,Marion County,260,540,15200
+2020,outflow,47,157,47,157,TN,Shelby County Total Migration-US,22400,45000,1310000
+2020,outflow,47,157,17,031,TN,Shelby County,460,950,30500
+2020,outflow,47,157,18,097,TN,Shelby County,280,580,17600
+2020,inflow,39,035,39,035,OH,Cuyahoga County Total Migration-US,14200,28200,830000
+2020,inflow,36,061,39,035,NY,New York County,140,250,12800
+2020,outflow,39,035,39,035,OH,Cuyahoga County Total Migration-US,18800,37000,1100000
+2020,outflow,39,035,36,061,OH,Cuyahoga County,210,360,19000

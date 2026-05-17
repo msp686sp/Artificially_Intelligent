@@ -1,0 +1,6 @@
+zcta5,state,metro,county_name,yield_score,demand_score,supply_score,operability_score,risk_score
+10025,NY,"New York-Newark-Jersey City, NY-NJ-PA",New York County,-1.5,1.2,-0.8,-0.5,0.9
+60614,IL,"Chicago-Naperville-Elgin, IL-IN-WI",Cook County,-0.4,0.3,-0.2,0.1,0.2
+46220,IN,"Indianapolis-Carmel-Anderson, IN",Marion County,0.8,0.5,0.4,0.6,-0.3
+38104,TN,"Memphis, TN-MS-AR",Shelby County,1.6,-0.2,0.3,-1.1,0.5
+44102,OH,"Cleveland-Elyria, OH",Cuyahoga County,1.9,-0.6,0.7,-0.8,0.7

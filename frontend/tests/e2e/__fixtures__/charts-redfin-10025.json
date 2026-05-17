@@ -1,0 +1,12 @@
+{
+  "zcta5": "10025",
+  "series": "redfin",
+  "points": [
+    { "date": "2024-01-31", "median_dom": 42, "sale_to_list": 0.98, "inventory": 320 },
+    { "date": "2024-04-30", "median_dom": 39, "sale_to_list": 0.99, "inventory": 295 },
+    { "date": "2024-07-31", "median_dom": 35, "sale_to_list": 1.00, "inventory": 270 },
+    { "date": "2024-10-31", "median_dom": 41, "sale_to_list": 0.98, "inventory": 305 },
+    { "date": "2025-01-31", "median_dom": 38, "sale_to_list": 0.99, "inventory": 282 },
+    { "date": "2025-04-30", "median_dom": 36, "sale_to_list": 1.00, "inventory": 265 }
+  ]
+}

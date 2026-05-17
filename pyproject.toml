@@ -1,0 +1,91 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rental"
+version = "0.0.1"
+description = "Personal zip-level rental market analysis platform (SFR cash flow, free public data)"
+requires-python = ">=3.11"
+dependencies = [
+    "duckdb>=1.0",
+    "pandas>=2.2",
+    "numpy>=1.26",
+    "httpx>=0.27",
+    "click>=8.1",
+    "pyyaml>=6.0",
+    "rich>=13.7",
+    "jinja2>=3.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.5",
+]
+# Needed only for the real CBSA delineation xlsx fetch. Tests use a
+# bundled CSV fixture, so this is opt-in to keep the test footprint thin.
+xlsx = [
+    "openpyxl>=3.1",
+]
+# ------------------------------------------------------------------
+# GUI extra — FastAPI backend stack used by the gooey. Owned by agent-1
+# (api-core); other agents extend additively in their own labeled block.
+# httpx is already in core dependencies and re-used by TestClient.
+# ------------------------------------------------------------------
+gui = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic-settings>=2.4",
+    "python-multipart>=0.0.9",
+]
+
+[project.scripts]
+rental = "rental.cli:cli"
+
+[tool.setuptools.packages.find]
+where = ["src", "."]
+include = ["rental*", "api*"]
+exclude = ["tests*", "frontend*", "docs*", "data*", "config*", "notebooks*"]
+
+[tool.setuptools.package-data]
+"rental.db" = ["*.sql"]
+"rental.scoring" = ["*.sql"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B"]
+
+# FastAPI's idiomatic ``Depends(...)`` / ``Query(...)`` / ``Body(...)``
+# defaults trip ruff's B008 ("function call in default argument") even
+# though they are part of FastAPI's documented contract for declaring
+# dependencies. Whitelist them so the lint stays useful for real bugs.
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = [
+    "fastapi.Body",
+    "fastapi.Depends",
+    "fastapi.Query",
+    "fastapi.Path",
+    "fastapi.Header",
+    "fastapi.Cookie",
+    "fastapi.Form",
+    "fastapi.File",
+    "fastapi.Security",
+]
+
+# Belt + suspenders: keep the per-file ignore so any new B008 patterns
+# in route modules don't break CI before the immutable-calls list grows.
+[tool.ruff.lint.per-file-ignores]
+"api/routes/*.py" = ["B008"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# importlib mode prevents the ``tests/api`` package from shadowing the
+# top-level ``api`` package during test collection.
+addopts = "-ra --import-mode=importlib"
+asyncio_mode = "auto"
+pythonpath = [".", "src"]

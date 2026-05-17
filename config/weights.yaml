@@ -1,0 +1,53 @@
+# Composite MarketScore weights. Tuned against the Phase 6 backtest
+# (primary target: 5yr levered cash-on-cash + appreciation, combined).
+
+market_score:
+  yield: 0.25
+  demand: 0.30
+  supply: 0.20
+  operability: 0.20
+  risk: -0.05
+
+yield_score:
+  gross_yield: 0.50               # higher is better; positive z-score
+  effective_tax_rate: 0.30        # neg z (higher tax = lower score)
+  insurance_rate: 0.20            # neg z (higher premium = lower score)
+
+# Phase 2 (Demand half): wage-weighted job growth + migration + income growth.
+# Within-state robust z-scores (median + MAD), weighted sum.
+demand_score:
+  wage_weighted_job_cagr: 0.40
+  net_migration_per_1000: 0.35
+  hh_income_growth: 0.25
+
+# SupplyScore (Phase 3). Negative weights — higher supply pressure (permits
+# per existing unit, multifamily share, rising DOM, rising inventory) is
+# bad for rent growth. Within-state z-scoring keeps cross-state volume
+# differences from dominating.
+supply_score:
+  permits_per_1000: -0.5
+  multifamily_share: -0.3
+  supply_pressure_index: -0.2
+  # Redfin-derived (final weights land alongside the permits coefficients):
+  dom_yoy_delta: null
+  inventory_yoy_change: null
+
+# OperabilityScore (Phase 4) — within-state z-scores. Negative weights on
+# features where smaller = better (tax, insurance, eviction). DOM levels
+# from Redfin are illiquidity proxies, still tuning — left null.
+operability_score:
+  effective_tax_rate: -0.40
+  insurance_rate_estimate: -0.30
+  eviction_filing_rate: -0.30
+  # redfin-agent features (weights tuned alongside the above):
+  dom_3mo_avg: null
+  sale_to_list_3mo_avg: null
+
+# RiskScore (Phase 4) — national z-scores on FEMA NRI hazard components.
+# All negative — higher hazard should pull the composite down. Weights
+# sum to <1 to leave room for a Phase 5 employer-HHI concentration term.
+risk_score:
+  climate_risk_score: -0.50
+  flood_risk: -0.15
+  wildfire_risk: -0.15
+  hurricane_risk: -0.20

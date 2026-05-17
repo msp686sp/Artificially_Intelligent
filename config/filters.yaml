@@ -1,0 +1,28 @@
+# Hard filters: zips that fail are excluded from rankings.
+# Defaults reflect the locked design: ONLY price band + data-quality
+# filters are ON. Regulation/climate/population filters are available
+# but opt-in so the universe isn't silently pre-narrowed.
+
+filters:
+  median_home_price:
+    enabled: true
+    min: 80000
+    max: 250000
+
+  zori_coverage:
+    enabled: true
+    min_months: 24       # months of rent data available; suppresses thin-data zips
+
+  gross_yield_monthly_pct:
+    enabled: false
+    min: 0.8             # rent/price > 0.8% per month (~9.6% gross annual yield)
+
+  exclude_rent_controlled:
+    enabled: false
+
+  exclude_high_climate_risk:
+    enabled: false       # FEMA AE/VE + wildfire WUI + insurance CAGR > 15%/yr
+
+  exclude_shrinking_metros:
+    enabled: false
+    population_cagr_min: -0.0025   # -0.25%/yr floor over 10yr
