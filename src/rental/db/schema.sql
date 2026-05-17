@@ -59,3 +59,21 @@ CREATE TABLE IF NOT EXISTS refresh_log (
     status        VARCHAR,
     error         VARCHAR
 );
+
+-- ============================================================
+-- Phase 1 (Yield half) — added by agent/phase2-yield.
+-- Additive only: new raw tables for Zillow ZORI (rent index) and
+-- Census geo. Schema for geo_zcta / geo_county / geo_cbsa /
+-- geo_zcta_county_xwalk above already matches what the loaders write.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS raw_zillow_zori (
+    region_id        VARCHAR,
+    zcta5            VARCHAR,
+    state            VARCHAR,
+    metro            VARCHAR,
+    county_name      VARCHAR,
+    observation_date DATE,
+    zori             DOUBLE,
+    snapshot_date    DATE,
+    PRIMARY KEY (zcta5, observation_date, snapshot_date)
+);
