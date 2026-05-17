@@ -41,11 +41,14 @@ function NewRunCard({ activeJobId }: { activeJobId: string | null }) {
   });
   return (
     <Card>
-      <h2 className="text-lg font-semibold">New run</h2>
+      <h2 className="text-lg font-semibold" data-testid="backtest-new-run-btn">
+        New run
+      </h2>
       <p className="mt-1 text-xs text-fg-muted">
         Range-of-years rolling backtest.
       </p>
       <form
+        data-testid="backtest-run-form-root"
         className="mt-3 flex flex-wrap items-end gap-3"
         onSubmit={handleSubmit((data) => mutation.mutate(data))}
       >
@@ -55,6 +58,7 @@ function NewRunCard({ activeJobId }: { activeJobId: string | null }) {
             type="number"
             min={1996}
             max={2099}
+            data-testid="backtest-run-form-start-year"
             {...register("start_year", { valueAsNumber: true, required: true })}
             className="w-28 rounded-md border border-bg-subtle bg-bg-subtle px-3 py-2 text-sm"
           />
@@ -65,6 +69,7 @@ function NewRunCard({ activeJobId }: { activeJobId: string | null }) {
             type="number"
             min={1996}
             max={2099}
+            data-testid="backtest-run-form-end-year"
             {...register("end_year", { valueAsNumber: true, required: true })}
             className="w-28 rounded-md border border-bg-subtle bg-bg-subtle px-3 py-2 text-sm"
           />
@@ -72,6 +77,7 @@ function NewRunCard({ activeJobId }: { activeJobId: string | null }) {
         <Button
           type="submit"
           variant="primary"
+          data-testid="backtest-run-form-submit"
           disabled={mutation.isPending || !formState.isValid}
         >
           {mutation.isPending ? <Spinner /> : null} Run
@@ -203,13 +209,18 @@ export default function BacktestHub() {
         id: "select",
         header: "",
         cell: ({ row }) => (
-          <input
-            type="checkbox"
-            checked={selected.has(row.original.id)}
-            onChange={() => toggle(row.original.id)}
-            onClick={(e) => e.stopPropagation()}
-            aria-label={`Select run ${row.original.id}`}
-          />
+          <span
+            data-testid={`backtest-run-row-${row.original.id}`}
+            className="inline-flex items-center"
+          >
+            <input
+              type="checkbox"
+              checked={selected.has(row.original.id)}
+              onChange={() => toggle(row.original.id)}
+              onClick={(e) => e.stopPropagation()}
+              aria-label={`Select run ${row.original.id}`}
+            />
+          </span>
         ),
         enableSorting: false,
       },
@@ -255,7 +266,7 @@ export default function BacktestHub() {
   const selectedIds = useMemo(() => Array.from(selected), [selected]);
 
   return (
-    <div className="flex flex-col gap-4 p-4 lg:p-6">
+    <div className="flex flex-col gap-4 p-4 lg:p-6" data-testid="backtest-root">
       <header className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-semibold">Backtest</h1>
         {progressLine && (
@@ -296,6 +307,7 @@ export default function BacktestHub() {
           </div>
         ) : (
           <DataTable
+            data-testid="backtest-runs-table"
             data={runsQuery.data ?? []}
             columns={columns}
             onRowClick={(r) => navigate(`/backtest/${r.id}`)}

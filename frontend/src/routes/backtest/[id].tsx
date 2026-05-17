@@ -109,7 +109,10 @@ export default function BacktestDetail() {
   const reportSrc = `/api/backtest/runs/${id}/report.html`;
 
   return (
-    <div className="flex flex-col gap-4 p-4 lg:p-6">
+    <div
+      className="flex flex-col gap-4 p-4 lg:p-6"
+      data-testid="backtest-detail-root"
+    >
       <header className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-baseline gap-3">
@@ -140,6 +143,7 @@ export default function BacktestDetail() {
           )}
         </div>
         <div
+          data-testid="backtest-detail-ready-banner"
           className={cn(
             "rounded-md border px-3 py-2 text-sm",
             ready
@@ -159,6 +163,7 @@ export default function BacktestDetail() {
           <button
             key={t}
             onClick={() => setTab(t)}
+            data-testid={`backtest-detail-tab-${t}`}
             className={cn(
               "px-3 py-2 text-sm font-medium",
               tab === t
@@ -176,6 +181,7 @@ export default function BacktestDetail() {
           <Card>
             <h2 className="mb-2 font-semibold">Spearman by snapshot</h2>
             <DataTable
+              data-testid="backtest-detail-summary-table"
               data={run.data.snapshots}
               columns={spearmanColumns}
               rowKey={(r) => r.snapshot}
@@ -185,7 +191,7 @@ export default function BacktestDetail() {
           </Card>
           <Card>
             <h2 className="mb-2 font-semibold">Quintile mean realized return</h2>
-            <div className="h-72">
+            <div className="h-72" data-testid="backtest-detail-quintiles">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={quintileChartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1f2330" />
@@ -276,6 +282,7 @@ export default function BacktestDetail() {
           <Card className="p-0">
             <iframe
               title="Backtest report"
+              data-testid="backtest-detail-report-iframe"
               src={reportSrc}
               sandbox="allow-same-origin"
               className="h-[calc(100vh-16rem)] w-full rounded-xl bg-white"
