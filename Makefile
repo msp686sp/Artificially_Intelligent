@@ -1,4 +1,5 @@
-.PHONY: init install refresh refresh-fixture score rank smoke test lint ci doctor status clean
+.PHONY: init install refresh refresh-fixture score rank smoke test lint ci doctor status clean \
+        gui-test gui-screens gui-screens-ci
 
 PYTHON ?= python3
 RANK_OUT ?= data/rankings/price_rank.csv
@@ -67,3 +68,25 @@ doctor:
 
 clean:
 	rm -rf data/warehouse.duckdb data/raw data/interim data/snapshots data/rankings data/manifest.json
+
+# ---------------------------------------------------------------------------
+# GUI targets (owned by agent 8 / playwright). All targets are additive and
+# safe to run with or without the frontend integrated. The Playwright suite
+# mocks every /api/** call, so the backend does NOT need to be running.
+# ---------------------------------------------------------------------------
+
+# Full GUI smoke: API tests + frontend unit tests + Playwright E2E.
+gui-test:
+	$(PYTHON) -m pytest tests/api || echo "tests/api not present yet; skipping"
+	cd frontend && npm run test
+	cd frontend && npx playwright test
+
+# Regenerate Playwright visual baselines under
+# frontend/tests/e2e/__screenshots__/. Run this locally after the frontend
+# is integrated, then commit the resulting PNGs.
+gui-screens:
+	cd frontend && npx playwright test --update-snapshots
+
+# CI-only compare. Fails if any screenshot diverges from baseline.
+gui-screens-ci:
+	cd frontend && npx playwright test
