@@ -56,7 +56,7 @@ export default function CompareIndex() {
 
   if (zcta5s.length === 0) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4" data-testid="compare-root">
         <h1 className="text-2xl font-semibold">Compare zips</h1>
         <Card>
           <p className="text-sm text-fg-muted">
@@ -86,7 +86,7 @@ export default function CompareIndex() {
   }));
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="compare-root">
       <header className="flex flex-wrap items-baseline justify-between gap-2">
         <h1 className="text-2xl font-semibold">
           Compare {zcta5s.length} zip{zcta5s.length === 1 ? "" : "s"}
@@ -119,7 +119,9 @@ export default function CompareIndex() {
 
       <Card>
         <h2 className="mb-2 text-lg font-semibold">Sub-score overlay</h2>
-        <SubScoreRadar series={radarSeries} height={320} />
+        <div data-testid="compare-radar">
+          <SubScoreRadar series={radarSeries} height={320} />
+        </div>
       </Card>
 
       {/* Numeric grid (desktop) + accordion (mobile) */}
@@ -135,11 +137,15 @@ export default function CompareIndex() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <h2 className="mb-2 text-lg font-semibold">ZHVI overlay</h2>
-          <ZhviLine series={zhviSeries} />
+          <div data-testid="compare-chart-zhvi">
+            <ZhviLine series={zhviSeries} />
+          </div>
         </Card>
         <Card>
           <h2 className="mb-2 text-lg font-semibold">ZORI overlay</h2>
-          <ZoriLine series={zoriSeries} />
+          <div data-testid="compare-chart-zori">
+            <ZoriLine series={zoriSeries} />
+          </div>
         </Card>
       </div>
     </div>
@@ -182,7 +188,7 @@ function AddZipInput({
 function FeatureGrid({ zips }: { zips: ReturnType<typeof useCompare> }) {
   // For each row, determine the "best in row" value (numeric only).
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto" data-testid="compare-grid">
       <table className="min-w-full text-sm">
         <thead className="bg-bg-subtle">
           <tr>
@@ -213,11 +219,12 @@ function FeatureGrid({ zips }: { zips: ReturnType<typeof useCompare> }) {
                 : Math.min(...numericValues)
               : null;
             return (
-              <tr key={row.key}>
+              <tr key={row.key} data-testid={`compare-row-${row.key}`}>
                 <td className="px-3 py-1.5 font-mono text-xs">{row.label}</td>
                 {values.map((v, i) => (
                   <td
                     key={i}
+                    data-testid={`compare-cell-${zips.zcta5s[i]}-${row.key}`}
                     className={cx(
                       "px-3 py-1.5",
                       best !== null && v === best && "bg-success/15 text-success font-semibold",

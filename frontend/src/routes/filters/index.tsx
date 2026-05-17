@@ -126,11 +126,15 @@ export default function FiltersIndex() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="filters-root">
       <header className="flex flex-wrap items-baseline justify-between gap-2">
         <h1 className="text-2xl font-semibold">Filters &amp; weights</h1>
         <div className="flex flex-wrap items-center gap-2">
-          <Button onClick={runPreview} disabled={previewLoading || !!draftErrors["filters.yaml"]}>
+          <Button
+            data-testid="filters-preview-btn"
+            onClick={runPreview}
+            disabled={previewLoading || !!draftErrors["filters.yaml"]}
+          >
             {previewLoading ? "Previewing…" : "Preview"}
           </Button>
         </div>
@@ -151,7 +155,10 @@ export default function FiltersIndex() {
                   {err ? <Chip tone="danger">invalid YAML</Chip> : null}
                 </div>
               </div>
-              <div className="overflow-hidden rounded-md border border-bg-panel">
+              <div
+                className="overflow-hidden rounded-md border border-bg-panel"
+                data-testid={file === "filters.yaml" ? "filters-editor-yaml" : "filters-editor-weights"}
+              >
                 <CodeMirror
                   value={drafts[file]}
                   height="320px"
@@ -174,7 +181,12 @@ export default function FiltersIndex() {
                   <Button size="sm" variant="ghost" onClick={() => onDiscard(file)} disabled={!dirty}>
                     Discard
                   </Button>
-                  <Button size="sm" onClick={() => onSave(file)} disabled={!dirty || !!err}>
+                  <Button
+                    size="sm"
+                    data-testid="filters-save-btn"
+                    onClick={() => onSave(file)}
+                    disabled={!dirty || !!err}
+                  >
                     Save
                   </Button>
                 </div>
@@ -234,8 +246,8 @@ function YamlDiffList({ changes }: { changes: YamlChange[] }) {
 
 function PreviewDiffPanel({ diff }: { diff: ReturnType<typeof rankingsDryRunDiff> }) {
   return (
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-      <div>
+    <div className="grid grid-cols-1 gap-3 md:grid-cols-3" data-testid="filters-diff">
+      <div data-testid="filters-diff-added">
         <h3 className="mb-1 text-xs font-semibold uppercase text-success">
           Added ({diff.added.length})
         </h3>
@@ -250,7 +262,7 @@ function PreviewDiffPanel({ diff }: { diff: ReturnType<typeof rankingsDryRunDiff
           ) : null}
         </ul>
       </div>
-      <div>
+      <div data-testid="filters-diff-removed">
         <h3 className="mb-1 text-xs font-semibold uppercase text-danger">
           Removed ({diff.removed.length})
         </h3>
