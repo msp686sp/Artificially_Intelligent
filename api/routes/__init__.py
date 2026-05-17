@@ -9,8 +9,13 @@ from __future__ import annotations
 
 from fastapi import APIRouter, FastAPI
 
+# Agent 3 — config / backtest / events
+from api.routes import backtest as _backtest
+
 # Agent 2 — sql / rankings / zips / charts
 from api.routes import charts as _charts
+from api.routes import config as _config
+from api.routes import events as _events
 
 # Agent 1 — core
 from api.routes import health as _health
@@ -20,12 +25,6 @@ from api.routes import schema as _schema
 from api.routes import sources as _sources
 from api.routes import sql as _sql
 from api.routes import zips as _zips
-
-# Agent 3 — config / backtest / events  (added after merge)
-# from api.routes import backtest as _backtest
-# from api.routes import config as _config
-# from api.routes import events as _events
-
 
 _ROUTERS: list[APIRouter] = [
     # Agent 1 — core
@@ -38,7 +37,10 @@ _ROUTERS: list[APIRouter] = [
     _rankings.router,
     _zips.router,
     _charts.router,
-    # Agent 3 — config / backtest / events  (added after merge)
+    # Agent 3 — config / backtest / events
+    _config.router,
+    _backtest.router,
+    _events.router,
 ]
 
 
