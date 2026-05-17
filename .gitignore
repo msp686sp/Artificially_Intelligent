@@ -32,3 +32,19 @@ data/manifest.json
 
 # Claude Code agent worktrees (transient, per-session)
 .claude/
+
+# Frontend (gooey) — node + build artifacts
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+frontend/test-results/
+frontend/playwright-report/
+# TypeScript build outputs (we ship .ts/.tsx sources only)
+frontend/**/*.tsbuildinfo
+frontend/src/**/*.js
+frontend/src/**/*.d.ts
+frontend/tests/**/*.js
+frontend/tests/**/*.d.ts
+frontend/*.js
+frontend/*.d.ts
+!frontend/*.config.cjs

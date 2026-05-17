@@ -1,4 +1,5 @@
-.PHONY: init install refresh refresh-fixture score rank smoke test lint ci doctor status clean
+.PHONY: init install refresh refresh-fixture score rank smoke test lint ci doctor status clean \
+        gui-fe-install gui-fe-dev gui-fe-build gui-fe-test gui-fe-lint
 
 PYTHON ?= python3
 RANK_OUT ?= data/rankings/price_rank.csv
@@ -67,3 +68,32 @@ doctor:
 
 clean:
 	rm -rf data/warehouse.duckdb data/raw data/interim data/snapshots data/rankings data/manifest.json
+
+# ===========================================================================
+# GUI frontend targets (owned by fe-shell, agent #4 of the gooey build).
+# Other agents (5/6/7) add to package.json and tests; these targets remain
+# the canonical entry points for install/dev/build/test/lint.
+# ===========================================================================
+
+# Install frontend deps with a lockfile-respecting install. The frontend
+# lives in ./frontend with its own package.json.
+gui-fe-install:
+	cd frontend && npm ci
+
+# Start the Vite dev server on :5173 with the /api proxy to FastAPI :8000.
+gui-fe-dev:
+	cd frontend && npm run dev
+
+# Production build → frontend/dist (served by `make gui-serve` when added
+# by api-core).
+gui-fe-build:
+	cd frontend && npm run build
+
+# Vitest run (unit tests + component tests). Playwright e2e runs under
+# `make gui-test` (added by agent #8).
+gui-fe-test:
+	cd frontend && npm run test
+
+# ESLint with --max-warnings=0 (configured inside package.json).
+gui-fe-lint:
+	cd frontend && npm run lint
