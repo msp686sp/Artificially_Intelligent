@@ -13,10 +13,14 @@ yield_score:
   effective_tax_rate: 0.30        # applied as -z
   insurance_rate: 0.20            # applied as -z
 
-# DemandScore, SupplyScore, OperabilityScore, RiskScore land in their
-# respective phases. Stubbed here for forward visibility.
+# Phase 2 (Demand half): wage-weighted job growth + migration + income growth.
+# Within-state robust z-scores (median + MAD), weighted sum.
+demand_score:
+  wage_weighted_job_cagr: 0.40
+  net_migration_per_1000: 0.35
+  hh_income_growth:       0.25
 
-demand_score: {}
+# SupplyScore, OperabilityScore, RiskScore land in their respective phases.
 supply_score: {}
 operability_score: {}
 risk_score: {}
