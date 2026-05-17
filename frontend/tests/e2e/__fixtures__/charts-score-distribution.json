@@ -1,0 +1,15 @@
+{
+  "dim": "market_score",
+  "bins": [
+    { "bucket": "0-10", "count": 12 },
+    { "bucket": "10-20", "count": 154 },
+    { "bucket": "20-30", "count": 873 },
+    { "bucket": "30-40", "count": 2412 },
+    { "bucket": "40-50", "count": 5681 },
+    { "bucket": "50-60", "count": 8740 },
+    { "bucket": "60-70", "count": 7965 },
+    { "bucket": "70-80", "count": 4915 },
+    { "bucket": "80-90", "count": 2104 },
+    { "bucket": "90-100", "count": 565 }
+  ]
+}

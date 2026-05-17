@@ -1,0 +1,4 @@
+# Playwright baseline screenshots land here after `make gui-screens`.
+# Empty by design in agent 8's first commit — the frontend doesn't
+# exist yet, so there's nothing to capture. The orchestrator regenerates
+# baselines post-integration.

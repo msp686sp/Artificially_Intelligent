@@ -1,0 +1,111 @@
+[
+  {
+    "source": "zillow_zhvi",
+    "status": "ok",
+    "last_refresh": "2026-05-15T08:00:00Z",
+    "age_days": 2,
+    "rows": 245321,
+    "fetch_url": "https://files.zillowstatic.com/research/public_csvs/zhvi/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv",
+    "sha256": "a1b2c3d4e5f60718293a4b5c6d7e8f90"
+  },
+  {
+    "source": "zillow_zori",
+    "status": "ok",
+    "last_refresh": "2026-05-15T08:05:00Z",
+    "age_days": 2,
+    "rows": 198432,
+    "fetch_url": "https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv",
+    "sha256": "b2c3d4e5f6071829304a5b6c7d8e9f01"
+  },
+  {
+    "source": "redfin_market",
+    "status": "ok",
+    "last_refresh": "2026-05-14T08:00:00Z",
+    "age_days": 3,
+    "rows": 87213,
+    "fetch_url": "https://redfin-public-data.s3.us-west-2.amazonaws.com/redfin_market_tracker/zip_code_market_tracker.tsv000.gz",
+    "sha256": "c3d4e5f60718293a4b5c6d7e8f901a12"
+  },
+  {
+    "source": "census_acs",
+    "status": "ok",
+    "last_refresh": "2026-04-10T08:00:00Z",
+    "age_days": 37,
+    "rows": 33120,
+    "fetch_url": "https://api.census.gov/data/2022/acs/acs5",
+    "sha256": "d4e5f60718293a4b5c6d7e8f901a1234"
+  },
+  {
+    "source": "irs_soi",
+    "status": "ok",
+    "last_refresh": "2026-03-01T08:00:00Z",
+    "age_days": 77,
+    "rows": 27654,
+    "fetch_url": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-statistics-zip-code-data-soi",
+    "sha256": "e5f60718293a4b5c6d7e8f901a123456"
+  },
+  {
+    "source": "bls_qcew",
+    "status": "ok",
+    "last_refresh": "2026-05-01T08:00:00Z",
+    "age_days": 16,
+    "rows": 18213,
+    "fetch_url": "https://www.bls.gov/cew/downloadable-data-files.htm",
+    "sha256": "f60718293a4b5c6d7e8f901a12345678"
+  },
+  {
+    "source": "fema_nri",
+    "status": "ok",
+    "last_refresh": "2026-04-25T08:00:00Z",
+    "age_days": 22,
+    "rows": 32987,
+    "fetch_url": "https://hazards.fema.gov/nri/data-resources",
+    "sha256": "0718293a4b5c6d7e8f901a123456789a"
+  },
+  {
+    "source": "noaa_climate",
+    "status": "stale",
+    "last_refresh": "2026-02-01T08:00:00Z",
+    "age_days": 105,
+    "rows": 31002,
+    "fetch_url": "https://www.ncei.noaa.gov/cdo-web/",
+    "sha256": "18293a4b5c6d7e8f901a123456789abc"
+  },
+  {
+    "source": "eviction_lab",
+    "status": "ok",
+    "last_refresh": "2026-04-20T08:00:00Z",
+    "age_days": 27,
+    "rows": 14322,
+    "fetch_url": "https://evictionlab.org/eviction-tracking/",
+    "sha256": "8293a4b5c6d7e8f901a123456789abcd"
+  },
+  {
+    "source": "hud_fmr",
+    "status": "ok",
+    "last_refresh": "2026-05-05T08:00:00Z",
+    "age_days": 12,
+    "rows": 25401,
+    "fetch_url": "https://www.huduser.gov/portal/datasets/fmr.html",
+    "sha256": "293a4b5c6d7e8f901a123456789abcde"
+  },
+  {
+    "source": "atttom_tax",
+    "status": "ok",
+    "last_refresh": "2026-05-10T08:00:00Z",
+    "age_days": 7,
+    "rows": 41203,
+    "fetch_url": "https://api.attomdata.com/propertyapi/",
+    "sha256": "93a4b5c6d7e8f901a123456789abcdef"
+  },
+  {
+    "source": "openinsurance",
+    "status": "error",
+    "last_refresh": "2026-05-12T08:00:00Z",
+    "age_days": 5,
+    "rows": 0,
+    "fetch_url": "https://openinsurance.org/data",
+    "sha256": null,
+    "error": "HTTP 503 from upstream"
+  }
+]

@@ -1,6 +1,7 @@
 .PHONY: init install refresh refresh-fixture score rank smoke smoke-rank test lint ci doctor status clean \
         gui-install gui-api-dev \
-        gui-fe-install gui-fe-dev gui-fe-build gui-fe-test gui-fe-lint
+        gui-fe-install gui-fe-dev gui-fe-build gui-fe-test gui-fe-lint \
+        gui-test gui-screens gui-screens-ci
 
 PYTHON ?= python3
 RANK_OUT ?= data/rankings/price_rank.csv
@@ -74,6 +75,7 @@ clean:
 # GUI (the "gooey") — see docs/gooey-plan.md.
 # Backend targets owned by api-core (agent 1).
 # Frontend targets owned by fe-shell (agent 4).
+# E2E/visual targets owned by playwright (agent 8).
 # ============================================================
 
 # --- Backend ---
@@ -109,3 +111,20 @@ gui-fe-test:
 # ESLint with --max-warnings=0 (configured inside package.json).
 gui-fe-lint:
 	cd frontend && npm run lint
+# --- Playwright (e2e + visual regression) ---
+
+# Full GUI smoke: API tests + frontend unit tests + Playwright E2E.
+gui-test:
+	$(PYTHON) -m pytest tests/api
+	cd frontend && npm run test
+	cd frontend && npx playwright test
+
+# Regenerate Playwright visual baselines under
+# frontend/tests/e2e/__screenshots__/. Run this locally after the frontend
+# is integrated, then commit the resulting PNGs.
+gui-screens:
+	cd frontend && npx playwright test --update-snapshots
+
+# CI-only compare. Fails if any screenshot diverges from baseline.
+gui-screens-ci:
+	cd frontend && npx playwright test
