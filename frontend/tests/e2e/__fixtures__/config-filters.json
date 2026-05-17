@@ -1,0 +1,18 @@
+{
+  "file": "filters.yaml",
+  "content": "min_population: 20000\nmin_rent_to_value: 0.005\nmax_property_tax: 0.012\nmax_climate_risk: 70\nrequired_states: []\nexcluded_states: [\"AK\", \"HI\"]\n",
+  "parsed": {
+    "min_population": 20000,
+    "min_rent_to_value": 0.005,
+    "max_property_tax": 0.012,
+    "max_climate_risk": 70,
+    "required_states": [],
+    "excluded_states": ["AK", "HI"]
+  },
+  "preview": {
+    "before": { "count": 412 },
+    "after": { "count": 384 },
+    "added": ["12345", "23456"],
+    "removed": ["34567", "45678", "56789"]
+  }
+}
