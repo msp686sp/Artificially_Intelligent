@@ -91,6 +91,8 @@ export interface SqlRunResponse {
 }
 
 export interface SchemaTableNode {
+  /** Optional schema namespace (DuckDB attaches `main` by default). */
+  schema?: string;
   kind: "table" | "view";
   name: string;
   columns: SchemaColumn[];
@@ -237,6 +239,72 @@ export interface TimeseriesResponse {
 export type TimeSeriesResponse = TimeseriesResponse;
 export type TimeSeriesPoint = TimeseriesPoint;
 
+/** Agent 7 backtest types. */
+export interface BacktestRunSummary {
+  id: number | string;
+  mode?: string;
+  started_at?: string;
+  finished_at?: string | null;
+  status?: string;
+  weights?: Record<string, number>;
+  primary_metric?: number | null;
+  report_path?: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+}
+
+/** A single point along the backtest snapshot grid. */
+export interface BacktestSnapshot {
+  snapshot: string;
+  spearman?: number | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+}
+
+/** Back-compat alias for agent 7's snapshot-spearman tables. */
+export type BacktestSnapshotSpearman = BacktestSnapshot;
+
+/** Quintile-mean row for the bar chart on the run-detail page. */
+export interface BacktestQuintileMean {
+  snapshot: string;
+  quintile: number;
+  mean_realized_return: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+}
+
+export interface BacktestRunDetail extends BacktestRunSummary {
+  snapshots?: BacktestSnapshot[];
+  quintile_bins?: unknown[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  baseline?: any;
+}
+
+export interface RunRequest {
+  start_year: number;
+  end_year: number;
+}
+
+export interface TuneRequest {
+  train_start: number;
+  train_end: number;
+  validate_start: number;
+  validate_end: number;
+}
+
+/** WebSocket event over /api/events. */
+export interface JobEvent {
+  type: string;
+  job_id: string;
+  payload?: Record<string, unknown>;
+  ts?: number;
+  timestamp?: string;
+}
+
+/** Back-compat aliases for agent 7's hooks. */
+export type SqlResponse = SqlRunResponse;
+export type SchemaTable = SchemaTableNode;
+
 /** Sub-score bundle for the radar chart. Includes both the canonical
  * 5-dimension names (yield/demand/supply/operability/risk) and the
  * agent-6 chart's growth/stability/affordability projections. */
@@ -334,21 +402,13 @@ export interface BacktestJobResponse {
   run_id: number;
 }
 
-export interface BacktestRunSummary {
-  id: number;
-  started_at: string;
-  finished_at: string | null;
-  mode: "run" | "tune";
-  weights: Record<string, number>;
-  primary_metric: number | null;
-  ready: boolean | null;
-}
+// Note: BacktestRunSummary / BacktestRunDetail are declared earlier in
+// this file (permissive shape that absorbs both agent 6 + 7 callers).
+// Agent 7's stricter declarations have been removed in integration.
 
-export interface BacktestRunDetail extends BacktestRunSummary {
-  snapshots: Array<{ snapshot: string; spearman: number | null; n: number }>;
-  quintile_bins: Array<{ quintile: number; mean: number; n: number }>;
-  html_report_path: string | null;
-}
+// Back-compat aliases for agent 7's hooks.
+export type JobResponse = BacktestJobResponse;
+export type SqlRequest = SqlRunRequest;
 
 // =====================================================================
 // Refresh log

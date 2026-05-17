@@ -66,6 +66,8 @@ export interface DataTableProps<TData> {
   pageSize?: number;
   /** Initial sort state. */
   initialSort?: SortingState;
+  /** Back-compat alias for ``initialSort``. */
+  initialSorting?: SortingState;
   /** CSV filename without extension. */
   exportName?: string;
   /** Allow callers to force the layout (e.g. tests). Defaults to auto. */
@@ -73,6 +75,8 @@ export interface DataTableProps<TData> {
   emptyMessage?: ReactNode;
   className?: string;
   "data-testid"?: string;
+  /** When false, the column-visibility toolbar entry is suppressed. */
+  enableColumnVisibility?: boolean;
 }
 
 /**
@@ -94,6 +98,7 @@ export function DataTable<TData>({
   title,
   pageSize = 50,
   initialSort,
+  initialSorting,
   exportName,
   layout = "auto",
   emptyMessage = "No rows to display.",
@@ -103,7 +108,7 @@ export function DataTable<TData>({
   const isMobile = useIsMobile();
   const resolvedLayout = layout === "auto" ? (isMobile ? "cards" : "table") : layout;
 
-  const [sorting, setSorting] = useState<SortingState>(initialSort ?? []);
+  const [sorting, setSorting] = useState<SortingState>(initialSort ?? initialSorting ?? []);
   const [globalFilter, setGlobalFilter] = useState("");
   const [densityState, setDensity] = useState<Density>("comfortable");
   const density = densityProp ?? densityState;

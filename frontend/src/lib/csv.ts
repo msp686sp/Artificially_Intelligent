@@ -3,7 +3,10 @@
 // and works the same in tests as in the browser.
 
 export type CsvValue = string | number | boolean | null | undefined;
-export type CsvRow = Record<string, CsvValue>;
+// Permissive row shape — accept unknown values so callers don't have
+// to narrow first; escapeCsvCell coerces to a string at write time.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type CsvRow = Record<string, any>;
 
 /**
  * Escape a single CSV cell. RFC 4180: wrap in double quotes if the value
@@ -46,4 +49,29 @@ export function downloadCsv(filename: string, csv: string): void {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+}
+
+/** Back-compat helper used by agent 7's SQL workbench, which calls
+ *  ``rowsToCsv(columns, rows)`` where rows are array-of-arrays. */
+export function rowsToCsv(
+  columnsOrRows: string[] | CsvRow[],
+  rows?: Array<Array<CsvValue>> | CsvRow[],
+): string {
+  // Two-arg shape: (columns: string[], rows: any[][]).
+  if (rows !== undefined) {
+    const cols = columnsOrRows as string[];
+    const header = cols.map(escapeCsvCell).join(",");
+    if ((rows as unknown[]).length === 0) return header;
+    const body = (rows as unknown[]).map((row) => {
+      if (Array.isArray(row)) {
+        return (row as CsvValue[]).map(escapeCsvCell).join(",");
+      }
+      return cols
+        .map((c) => escapeCsvCell((row as CsvRow)[c]))
+        .join(",");
+    }).join("\n");
+    return `${header}\n${body}`;
+  }
+  // One-arg shape — delegate to toCsv.
+  return toCsv(columnsOrRows as CsvRow[]);
 }

@@ -20,6 +20,13 @@ import ZipDetail from "@/routes/rankings/[zcta5]";
 import CompareIndex from "@/routes/compare/index";
 import FiltersIndex from "@/routes/filters/index";
 
+// Agent 7 (fe-sql-backtest)
+import SqlWorkbench from "@/routes/sql";
+import SchemaBrowser from "@/routes/schema";
+import BacktestHub from "@/routes/backtest";
+import BacktestDetail from "@/routes/backtest/[id]";
+import BacktestCompare from "@/routes/backtest/compare";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -56,22 +63,11 @@ export function App() {
                 <Route path="/filters" element={<FiltersIndex />} />
 
                 {/* Agent 7 (fe-sql-backtest) */}
-                <Route
-                  path="/sql"
-                  element={<EmptyState pageName="SQL workbench" ownedBy="agent 7 (fe-sql-backtest)" />}
-                />
-                <Route
-                  path="/schema"
-                  element={<EmptyState pageName="Schema" ownedBy="agent 7 (fe-sql-backtest)" />}
-                />
-                <Route
-                  path="/backtest"
-                  element={<EmptyState pageName="Backtest" ownedBy="agent 7 (fe-sql-backtest)" />}
-                />
-                <Route
-                  path="/backtest/compare"
-                  element={<EmptyState pageName="Backtest compare" ownedBy="agent 7 (fe-sql-backtest)" />}
-                />
+                <Route path="/sql" element={<SqlWorkbench />} />
+                <Route path="/schema" element={<SchemaBrowser />} />
+                <Route path="/backtest" element={<BacktestHub />} />
+                <Route path="/backtest/compare" element={<BacktestCompare />} />
+                <Route path="/backtest/:id" element={<BacktestDetail />} />
                 {/* === ROUTES END === */}
 
                 {/* 404 — fe-shell owned. */}
