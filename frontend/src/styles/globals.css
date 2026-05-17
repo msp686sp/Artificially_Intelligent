@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family:
+    Inter,
+    system-ui,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Make sure CodeMirror inherits theme + sits at least 44px tall for touch. */
+.cm-editor {
+  min-height: 8rem;
+  font-family:
+    "JetBrains Mono",
+    ui-monospace,
+    monospace;
+  font-size: 0.875rem;
+}
+
+.cm-editor .cm-scroller {
+  font-family: inherit;
+}
+
+button,
+[role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Compact touch targets allowed inside DataTable cells / icon-only toolbars. */
+button.compact,
+[role="button"].compact {
+  min-height: 32px;
+  min-width: 32px;
+}
