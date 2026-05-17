@@ -91,7 +91,10 @@ export default function BacktestCompare() {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-4 lg:p-6">
+    <div
+      className="flex flex-col gap-4 p-4 lg:p-6"
+      data-testid="backtest-compare-root"
+    >
       <header className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-semibold">Compare runs</h1>
         <Link to="/backtest" className="text-sm text-fg-muted hover:underline">
@@ -113,7 +116,10 @@ export default function BacktestCompare() {
       <Card>
         <h2 className="mb-2 font-semibold">Weight diff</h2>
         <div className="overflow-auto">
-          <table className="min-w-full text-sm">
+          <table
+            data-testid="backtest-compare-weight-diff"
+            className="min-w-full text-sm"
+          >
             <thead className="bg-bg-subtle">
               <tr>
                 <th className="px-3 py-2 text-left">Weight</th>
@@ -152,7 +158,7 @@ export default function BacktestCompare() {
 
       <Card>
         <h2 className="mb-2 font-semibold">Spearman by snapshot</h2>
-        <div className="h-72">
+        <div className="h-72" data-testid="backtest-compare-spearman">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={spearmanChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1f2330" />
