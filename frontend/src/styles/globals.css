@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   Base styles — applied on top of Tailwind's preflight.
+   Design tokens are defined in tailwind.config.ts (plan §6).
+   ============================================================ */
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  html:not(.dark) {
+    color-scheme: light;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    font-family: theme("fontFamily.sans");
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: theme("colors.bg.DEFAULT");
+    color: theme("colors.fg.DEFAULT");
+  }
+
+  /* Light theme overrides. The default tokens are tuned for dark; this
+     layer recolors when the user toggles light mode via ThemeProvider. */
+  html:not(.dark) body {
+    background-color: #f7f8fa;
+    color: #11141b;
+  }
+
+  /* Default focus ring — visible on all interactive elements via :focus-visible. */
+  *:focus-visible {
+    outline: 2px solid theme("colors.accent.DEFAULT");
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Custom scrollbar (developer-tool aesthetic). */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: theme("colors.border.DEFAULT");
+    border-radius: 6px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: theme("colors.fg.subtle");
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@layer components {
+  /* Reusable utility for any tappable element that must hit 44x44. */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}

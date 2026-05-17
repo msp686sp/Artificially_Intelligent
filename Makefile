@@ -1,5 +1,6 @@
-.PHONY: init install refresh refresh-fixture score rank smoke test lint ci doctor status clean \
-        gui-install gui-api-dev
+.PHONY: init install refresh refresh-fixture score rank smoke smoke-rank test lint ci doctor status clean \
+        gui-install gui-api-dev \
+        gui-fe-install gui-fe-dev gui-fe-build gui-fe-test gui-fe-lint
 
 PYTHON ?= python3
 RANK_OUT ?= data/rankings/price_rank.csv
@@ -71,8 +72,11 @@ clean:
 
 # ============================================================
 # GUI (the "gooey") — see docs/gooey-plan.md.
-# Owned by agent-1 (api-core); other agents extend with their own targets.
+# Backend targets owned by api-core (agent 1).
+# Frontend targets owned by fe-shell (agent 4).
 # ============================================================
+
+# --- Backend ---
 
 # Install the rental package with the GUI extras (FastAPI + uvicorn + ...).
 gui-install:
@@ -82,3 +86,26 @@ gui-install:
 # dev server (:5173). OpenAPI docs at http://localhost:8000/docs.
 gui-api-dev:
 	$(PYTHON) -m uvicorn api.main:app --reload --port 8000
+
+# --- Frontend ---
+
+# Install frontend deps with a lockfile-respecting install. The frontend
+# lives in ./frontend with its own package.json.
+gui-fe-install:
+	cd frontend && npm ci
+
+# Start the Vite dev server on :5173 with the /api proxy to FastAPI :8000.
+gui-fe-dev:
+	cd frontend && npm run dev
+
+# Production build → frontend/dist (served by `make gui-serve` when added).
+gui-fe-build:
+	cd frontend && npm run build
+
+# Vitest run (unit + component). Playwright e2e runs under `make gui-test`.
+gui-fe-test:
+	cd frontend && npm run test
+
+# ESLint with --max-warnings=0 (configured inside package.json).
+gui-fe-lint:
+	cd frontend && npm run lint
