@@ -17,6 +17,15 @@ yield_score:
 # respective phases. Stubbed here for forward visibility.
 
 demand_score: {}
-supply_score: {}
+
+# SupplyScore (Phase 3). Weights are negative because higher supply
+# pressure (more permits per existing unit, more multifamily share)
+# is bad for rent growth. Z-scoring is done within state so the score
+# stays comparable across states with very different permit volumes.
+supply_score:
+  permits_per_1000: -0.5
+  multifamily_share: -0.3
+  supply_pressure_index: -0.2
+
 operability_score: {}
 risk_score: {}
