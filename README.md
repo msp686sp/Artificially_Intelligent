@@ -1,5 +1,7 @@
 # Rental Market Analysis
 
+![CI](https://github.com/msp686sp/Artificially_Intelligent/actions/workflows/ci.yml/badge.svg)
+
 Personal platform for finding profitable buy-and-hold SFR rental markets at
 the US zip-code level, using free public data.
 
@@ -48,3 +50,24 @@ data/                 # gitignored; rebuildable from sources
 tests/                # pytest + bundled fixtures
 docs/                 # discovery + plan
 ```
+
+## Development
+
+Continuous integration runs `pytest` + `ruff` on every push and on PRs to
+`main` (see `.github/workflows/ci.yml`). To replicate locally:
+
+```bash
+make ci              # pytest + ruff (same as the GitHub Actions job)
+```
+
+Operational helpers:
+
+```bash
+rental status        # pretty table of last-refresh date + row counts per source
+make doctor          # same as `rental status --strict`, warns if a source > 45d stale
+```
+
+Refresh freshness is tracked in `data/manifest.json`, updated automatically
+inside `Source.refresh()`. Override the warehouse / manifest location with
+the `RENTAL_WAREHOUSE_PATH` and `RENTAL_MANIFEST_PATH` environment
+variables (used by the CLI integration tests to keep runs hermetic).
