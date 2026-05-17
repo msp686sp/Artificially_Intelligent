@@ -141,6 +141,7 @@ function ToastViewport() {
   if (toasts.length === 0) return null;
   return (
     <div
+      data-testid="toast-region"
       role="region"
       aria-label="Notifications"
       className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex flex-col items-end gap-2 px-4 sm:bottom-6 sm:right-6 sm:left-auto sm:px-0"
@@ -148,6 +149,7 @@ function ToastViewport() {
       {toasts.map((t) => (
         <div
           key={t.id}
+          data-testid="toast-item"
           role="status"
           aria-live="polite"
           className={cn(

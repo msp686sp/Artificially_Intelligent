@@ -23,7 +23,10 @@ export function Shell({ children }: ShellProps) {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-bg text-fg">
+    <div
+      data-testid="shell-root"
+      className="flex h-screen w-screen overflow-hidden bg-bg text-fg"
+    >
       <Sidebar collapsed={!isDesktop} />
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar onOpenMobileNav={() => setMobileOpen(true)} />

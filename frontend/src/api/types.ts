@@ -15,6 +15,16 @@ export interface HealthInfo {
   uptime_s: number;
   warehouse_path?: string | null;
   manifest_path?: string | null;
+  /** Warehouse summary (added in plan §5 v2). Older API versions may omit. */
+  warehouse?: {
+    initialized?: boolean;
+    path?: string | null;
+    tables?: number;
+    zips?: number;
+  } | null;
+  sources_ok?: number;
+  sources_stale?: number;
+  sources_error?: number;
 }
 
 export interface VersionInfo {

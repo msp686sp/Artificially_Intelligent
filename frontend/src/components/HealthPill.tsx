@@ -14,7 +14,7 @@ export function HealthPill() {
     label = data.status;
   }
   return (
-    <span className="health-pill" title="API health">
+    <span data-testid="shell-status-pill" className="health-pill" title="API health">
       <span className={`dot ${dotClass}`} />
       <span>API: {label}</span>
     </span>

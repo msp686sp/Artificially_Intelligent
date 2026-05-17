@@ -47,7 +47,13 @@ export function Topbar({ onOpenMobileNav }: TopbarProps) {
         <div className="truncate text-[11px] text-fg-muted">{location.pathname}</div>
       </div>
       <Tooltip content={`Switch to ${resolved === "dark" ? "light" : "dark"} theme`}>
-        <Button variant="ghost" size="sm" onClick={toggle} aria-label="Toggle theme">
+        <Button
+          data-testid="shell-theme-toggle"
+          variant="ghost"
+          size="sm"
+          onClick={toggle}
+          aria-label="Toggle theme"
+        >
           {resolved === "dark" ? "Light" : "Dark"}
         </Button>
       </Tooltip>

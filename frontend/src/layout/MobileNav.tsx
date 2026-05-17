@@ -59,7 +59,7 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
       </Sheet>
 
       <nav
-        data-testid="mobile-bottom-nav"
+        data-testid="shell-mobile-nav"
         aria-label="Primary"
         className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-border-subtle bg-bg-panel/95 backdrop-blur sm:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}

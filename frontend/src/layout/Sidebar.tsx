@@ -15,7 +15,7 @@ interface SidebarProps {
 export function Sidebar({ collapsed = false }: SidebarProps) {
   return (
     <aside
-      data-testid="sidebar"
+      data-testid="shell-sidebar"
       className={cn(
         "hidden h-full shrink-0 flex-col border-r border-border-subtle bg-bg-panel sm:flex",
         collapsed ? "w-18" : "w-60",
