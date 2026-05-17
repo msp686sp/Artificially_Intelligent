@@ -17,6 +17,23 @@ yield_score:
 # respective phases. Stubbed here for forward visibility.
 
 demand_score: {}
-supply_score: {}
-operability_score: {}
+
+# SupplyScore consumes Redfin-derived features (no Redfin-specific subscore).
+# Weights are stubbed; final values land in Phase 3 alongside permits + vacancy.
+#   dom_yoy_delta:        positive = market softening / supply pressure up
+#   inventory_yoy_change: positive = more supply
+supply_score:
+  # redfin-agent features (weights tuned in Phase 3):
+  dom_yoy_delta: null
+  inventory_yoy_change: null
+
+# OperabilityScore also borrows DOM levels (high DOM = illiquidity, an
+# operator cost beyond cash flow). Final weights land in Phase 4.
+#   dom_3mo_avg:          high = harder to exit (illiquidity penalty)
+#   sale_to_list_3mo_avg: <1.0 = buyer's market (weaker disposition leverage)
+operability_score:
+  # redfin-agent features (weights tuned in Phase 4):
+  dom_3mo_avg: null
+  sale_to_list_3mo_avg: null
+
 risk_score: {}

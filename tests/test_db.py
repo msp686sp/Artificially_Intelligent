@@ -10,6 +10,6 @@ def test_schema_is_idempotent():
     tables = {r[0] for r in con.execute("SHOW TABLES").fetchall()}
     expected = {
         "geo_zcta", "geo_county", "geo_cbsa", "geo_zcta_county_xwalk",
-        "raw_zillow_zhvi", "refresh_log",
+        "raw_zillow_zhvi", "raw_redfin_market", "refresh_log",
     }
     assert expected <= tables

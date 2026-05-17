@@ -49,6 +49,26 @@ CREATE TABLE IF NOT EXISTS raw_zillow_zhvi (
 );
 
 -- ============================================================
+-- Phase 1/3 (Redfin): zip-code market tracker (DOM, sale-to-list,
+-- inventory). Sourced from Redfin Data Center's public S3 TSV.
+-- Owned by the Redfin agent; consumed by SupplyScore and
+-- OperabilityScore feature builders.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS raw_redfin_market (
+    zcta5                VARCHAR,
+    period_begin         DATE,
+    period_end           DATE,
+    median_dom           DOUBLE,
+    median_sale_to_list  DOUBLE,
+    inventory            DOUBLE,
+    new_listings         DOUBLE,
+    median_sale_price    DOUBLE,
+    homes_sold           DOUBLE,
+    snapshot_date        DATE,
+    PRIMARY KEY (zcta5, period_begin, snapshot_date)
+);
+
+-- ============================================================
 -- Refresh audit.
 -- ============================================================
 CREATE TABLE IF NOT EXISTS refresh_log (
