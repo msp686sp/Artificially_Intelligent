@@ -217,10 +217,9 @@ CREATE TABLE IF NOT EXISTS refresh_log (
 );
 
 -- ============================================================
--- Phase 1 (Yield half) — added by agent/phase2-yield.
--- Additive only: new raw tables for Zillow ZORI (rent index) and
--- Census geo. Schema for geo_zcta / geo_county / geo_cbsa /
--- geo_zcta_county_xwalk above already matches what the loaders write.
+-- Phase 1 (Yield half) — Zillow ZORI rent index. Geo spine
+-- (geo_zcta / geo_county / geo_cbsa / geo_zcta_county_xwalk) is
+-- defined above; the Census geo source populates those tables.
 -- ============================================================
 CREATE TABLE IF NOT EXISTS raw_zillow_zori (
     region_id        VARCHAR,
@@ -232,4 +231,24 @@ CREATE TABLE IF NOT EXISTS raw_zillow_zori (
     zori             DOUBLE,
     snapshot_date    DATE,
     PRIMARY KEY (zcta5, observation_date, snapshot_date)
+);
+
+-- ============================================================
+-- Phase 5 composite scoring contract.
+-- Sub-score producer agents (yield, demand, supply, operability,
+-- risk) write into this single skeleton table. The composite
+-- reader (`rental rank`) sums weighted sub-scores out of it.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS zip_scores (
+    zcta5             VARCHAR,
+    state             VARCHAR,
+    metro             VARCHAR,
+    county_name       VARCHAR,
+    yield_score       DOUBLE,
+    demand_score      DOUBLE,
+    supply_score      DOUBLE,
+    operability_score DOUBLE,
+    risk_score        DOUBLE,
+    snapshot_date     DATE,
+    PRIMARY KEY (zcta5, snapshot_date)
 );
