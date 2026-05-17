@@ -169,12 +169,13 @@ export default function SqlWorkbench() {
         : null;
 
   return (
-    <div className="flex flex-col gap-4 p-4 lg:p-6">
+    <div className="flex flex-col gap-4 p-4 lg:p-6" data-testid="sql-root">
       <header className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-semibold">SQL workbench</h1>
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={onToggleReadOnly}
+            data-testid="sql-readonly-toggle"
             className={cn(
               "inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium",
               readOnly
@@ -230,6 +231,7 @@ export default function SqlWorkbench() {
             onClick={() => runQuery()}
             disabled={sqlMutation.isPending}
             aria-label="Run (Cmd/Ctrl+Enter)"
+            data-testid="sql-run-btn"
           >
             {sqlMutation.isPending ? <Spinner /> : null}
             <span>Run</span>
@@ -248,8 +250,12 @@ export default function SqlWorkbench() {
       <div className="flex flex-wrap items-center gap-3 text-xs text-fg-muted">
         {sqlMutation.data && (
           <>
-            <Pill tone="accent">{sqlMutation.data.row_count} rows</Pill>
-            <span>{sqlMutation.data.elapsed_ms.toFixed(1)} ms</span>
+            <span data-testid="sql-row-count">
+              <Pill tone="accent">{sqlMutation.data.row_count} rows</Pill>
+            </span>
+            <span data-testid="sql-elapsed">
+              {sqlMutation.data.elapsed_ms.toFixed(1)} ms
+            </span>
             <button
               onClick={runExplain}
               className="underline-offset-2 hover:underline"
@@ -258,6 +264,7 @@ export default function SqlWorkbench() {
             </button>
             <button
               onClick={onExport}
+              data-testid="sql-export-csv-btn"
               className="underline-offset-2 hover:underline"
             >
               Export CSV
@@ -286,13 +293,15 @@ export default function SqlWorkbench() {
       )}
 
       {sqlMutation.data && !explainRows && (
-        <Card className="overflow-hidden">
-          <DataTable
-            data={sqlMutation.data.rows}
-            columns={columns}
-            emptyMessage="Query returned no rows"
-          />
-        </Card>
+        <div data-testid="sql-results-table">
+          <Card className="overflow-hidden">
+            <DataTable
+              data={sqlMutation.data.rows}
+              columns={columns}
+              emptyMessage="Query returned no rows"
+            />
+          </Card>
+        </div>
       )}
 
       {/* Read-only OFF warning */}
@@ -383,6 +392,7 @@ export default function SqlWorkbench() {
           </>
         }
       >
+        <div data-testid="sql-history">
         {history.length === 0 ? (
           <p className="text-fg-muted">No history yet.</p>
         ) : (
@@ -424,6 +434,7 @@ export default function SqlWorkbench() {
             ))}
           </ul>
         )}
+        </div>
       </Dialog>
 
       {/* Save */}
